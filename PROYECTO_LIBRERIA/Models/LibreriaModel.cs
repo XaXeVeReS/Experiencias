@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace LIBRERIA_APP.Models
+﻿namespace LIBRERIA_APP.Models
 {
     public class LibreriaModel
     {
@@ -43,6 +40,7 @@ namespace LIBRERIA_APP.Models
         public decimal Cantidad { get; set; }
         public decimal PrecioUnitario { get; set; }
         public decimal Descuento { get; set; }
+        public decimal SubTotal { get; set; }
     }
 
     public class ClienteModel

@@ -3,6 +3,324 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+
+<h1>GESTION DE USUARIOS</h1>
+
+
+@*  @await Html.PartialAsync("_PartialDetalleDocumento"); *@
+<!-- DASHBOARD Y BOTONES DE EJECUCIÓN -->
+<div class="row mb-3">
+    <!-- Indicadores del Dashboard -->
+    <div class="col-md-2 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">USUARIOS ACTIVOS:</h5>
+                <p class="card-text fs-4 fw-bold" id="idUSuariosActivos"></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">USUARIOS INACTIVOS:</h5>
+                <p class="card-text fs-4 fw-bold" id="idUsuarioInactivos"></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">ÁREAS:</h5>
+                <p class="card-text fs-4 fw-bold" id="idCantidadAreas">4</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">TOTAL DE MODULOS:</h5>
+                <p class="card-text fs-4 fw-bold" id="idModulos">9</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-2 d-flex justify-content-center align-items-center">
+        <button class="btn btn-success me-2" id="btnCrearUsuario" data-bs-toggle="modal" data-bs-target="#xIDusuarioModal">CREAR NUEVO USUARIO</button>
+        <button class="btn btn-warning me-2" id="btnCrearUsuario2" data-bs-toggle="modal" data-bs-target="#xIDusuarioModal">NUEVO FORMULARIO</button>
+    </div>
+
+</div>
+
+<!-- BARRA DE ESTADO -->
+@*  @await Html.PartialAsync("_PartialBarraEstado"); *@
+
+<!-- TABLA RESPONSIVA CON SCROLL HORIZONTAL -->
+<div class="table-responsive">
+    <table id="tblUsuarioLista" class="table table-striped table-bordered table-hover">
+        <thead style="background-color: #2f4050; color: #fff;">
+            <tr>
+                <th>ITEM</th>
+                <th>USUARIO</th>
+                <th>ROL APP</th>
+                <th>CORREO ELECTRONICO</th>
+                <th>NOMBRE COMPLETO</th>
+                <th>ACTIVO</th>
+                <th>FECHA REGISTRO</th>
+                <th>OPCIONES</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Más filas de ejemplo -->
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="xIDusuarioModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="usuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #2f4050; color: white;">
+                <h5 class="modal-title" id="usuarioModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>CREACION DE USUARIO
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-body-scroll">
+                <form id="usuarioForm">
+                    <!-- Datos Personales -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
+                                <b> <i class="bi bi-person-plus-fill nav-icon"></i> DATOS PERSONALES</b>
+                            </h6>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="nombreCompleto" class="form-label required">Nombre Completo</label>
+                            <input type="text" class="form-control" id="nombreCompleto" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="idTipoDocumento" class="form-label required">Tipo de Documento</label>
+                            <select class="form-select" id="idTipoDocumento" required>
+                                <option value="" selected disabled>Seleccione un tipo</option>
+                                @* <option value="1">DNI</option>
+                                <option value="2">Carnet de Extranjería</option>
+                                <option value="3">Pasaporte</option> *@
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="nroDocumento" class="form-label required">Número de Documento</label>
+                            <input type="text" class="form-control" id="nroDocumento" required>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="direccion" class="form-label required">Dirección</label>
+                            <input type="text" class="form-control" id="direccion" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="ubigeo" class="form-label required">Ubigeo</label>
+                            <input type="text" class="form-control" id="ubigeo" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label required">Teléfono</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input type="tel" class="form-control" id="telefono" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="correoElectronico" class="form-label required">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="correoElectronico" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Credenciales de Acceso -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
+                                <i class="bi bi-person-bounding-box nav-icon"></i> <b>CREDENCIALES DE ACCESO </b>
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="usuarioNombre" class="form-label required">Nombre de Usuario</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="usuarioNombre" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="idRol" class="form-label required">Rol de Usuario</label>
+                            <select class="form-select" id="idRol" required>
+                                <option value="" selected disabled>Seleccione un rol</option>
+                                @*                           <option value="1">Administrador</option>
+                                <option value="2">Usuario</option>
+                                <option value="3">Supervisor</option>
+                                <option value="4">Auditor</option> *@
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="contrasenia" class="form-label required">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="contrasenia" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <div class="password-strength strength-0" id="passwordStrength"></div>
+                                <small class="form-text text-muted" id="passwordFeedback">
+                                    La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>CANCELAR
+                </button>
+                <button type="button" class="btn btn-success" id="btnGuardar">
+                    <i class="fas fa-save me-2"></i>GUARDAR USUARIO
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="frmActualizarUsuario" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="usuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #2f4050; color: white;">
+                <h5 class="modal-title" id="usuarioModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>ACTUALIZAR USUARIO
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-body-scroll">
+                <form id="usuarioFormUpd">
+                    <!-- Datos Personales -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
+                                <b> <i class="bi bi-person-plus-fill nav-icon"></i> DATOS PERSONALES</b>
+                            </h6>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="nombreCompleto" class="form-label required">Nombre Completo</label>
+                            <input type="text" class="form-control" id="nombreCompletoUpd" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="idTipoDocumento" class="form-label required">Tipo de Documento</label>
+                            <select class="form-select" id="idTipoDocumentoUpd" required>
+                                <option value="" selected disabled>Seleccione un tipo</option>
+                                @*   <option value="1">DNI</option>
+                                <option value="2">Carnet de Extranjería</option>
+                                <option value="3">Pasaporte</option> *@
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="nroDocumento" class="form-label required">Número de Documento</label>
+                            <input type="text" class="form-control" id="nroDocumentoUpd" required>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="direccion" class="form-label required">Dirección</label>
+                            <input type="text" class="form-control" id="direccionUpd" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="ubigeo" class="form-label required">Ubigeo</label>
+                            <input type="text" class="form-control" id="ubigeoUpd" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label required">Teléfono</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input type="tel" class="form-control" id="telefonoUpd" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="correoElectronico" class="form-label required">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="correoElectronicoUpd" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Credenciales de Acceso -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
+                                <i class="bi bi-person-bounding-box nav-icon"></i> <b>CREDENCIALES DE ACCESO </b>
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="usuarioNombre" class="form-label required">Nombre de Usuario</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="usuarioNombreUpd" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="idRol" class="form-label required">Rol de Usuario</label>
+                            <select class="form-select" id="idRolUpd" required>
+                                <option value="" selected disabled>Seleccione un rol</option>
+                                @*  <option value="1">Administrador</option>
+                                <option value="2">Usuario</option>
+                                <option value="3">Supervisor</option>
+                                <option value="4">Auditor</option> *@
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="contraseniaUpd" class="form-label required">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="contraseniaUpd">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordUpd">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <div class="password-strength strength-0" id="passwordStrengthUpd"></div>
+                                <small class="form-text text-muted" id="passwordFeedbackUpd">
+                                    La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>CANCELAR
+                </button>
+                <button type="button" class="btn btn-success" id="btnGuardarUpd">
+                    <i class="fas fa-save me-2"></i>ACTUALIZAR USUARIO
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts
 {
     @* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> *@
@@ -713,320 +1031,3 @@
     </script>
 
 }
-<h1>GESTION DE USUARIOS</h1>
-
-
-@*  @await Html.PartialAsync("_PartialDetalleDocumento"); *@
-<!-- DASHBOARD Y BOTONES DE EJECUCIÓN -->
-<div class="row mb-3">
-    <!-- Indicadores del Dashboard -->
-    <div class="col-md-2 mb-2">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5 class="card-title">USUARIOS ACTIVOS:</h5>
-                <p class="card-text fs-4 fw-bold" id="idUSuariosActivos"></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2 mb-2">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5 class="card-title">USUARIOS INACTIVOS:</h5>
-                <p class="card-text fs-4 fw-bold" id="idUsuarioInactivos"></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2 mb-2">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5 class="card-title">ÁREAS:</h5>
-                <p class="card-text fs-4 fw-bold" id="idCantidadAreas">4</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2 mb-2">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5 class="card-title">TOTAL DE MODULOS:</h5>
-                <p class="card-text fs-4 fw-bold" id="idModulos">9</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2 mb-2 d-flex justify-content-center align-items-center">
-        <button class="btn btn-success me-2" id="btnCrearUsuario" data-bs-toggle="modal" data-bs-target="#xIDusuarioModal">CREAR NUEVO USUARIO</button>
-        <button class="btn btn-warning me-2" id="btnCrearUsuario2" data-bs-toggle="modal" data-bs-target="#xIDusuarioModal">NUEVO FORMULARIO</button>
-    </div>
-
-</div>
-
-<!-- BARRA DE ESTADO -->
-@*  @await Html.PartialAsync("_PartialBarraEstado"); *@
-
-<!-- TABLA RESPONSIVA CON SCROLL HORIZONTAL -->
-<div class="table-responsive">
-    <table id="tblUsuarioLista" class="table table-striped table-bordered table-hover">
-        <thead style="background-color: #2f4050; color: #fff;">
-            <tr>
-                <th>ITEM</th>
-                <th>USUARIO</th>
-                <th>ROL APP</th>
-                <th>CORREO ELECTRONICO</th>
-                <th>NOMBRE COMPLETO</th>
-                <th>ACTIVO</th>
-                <th>FECHA REGISTRO</th>
-                <th>OPCIONES</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Más filas de ejemplo -->
-        </tbody>
-    </table>
-</div>
-
-<div class="modal fade" id="xIDusuarioModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="usuarioModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header" style="background-color: #2f4050; color: white;">
-                <h5 class="modal-title" id="usuarioModalLabel">
-                    <i class="fas fa-user-plus me-2"></i>CREACION DE USUARIO
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body modal-body-scroll">
-                <form id="usuarioForm">
-                    <!-- Datos Personales -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
-                                <b> <i class="bi bi-person-plus-fill nav-icon"></i> DATOS PERSONALES</b>
-                            </h6>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label for="nombreCompleto" class="form-label required">Nombre Completo</label>
-                            <input type="text" class="form-control" id="nombreCompleto" required>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="idTipoDocumento" class="form-label required">Tipo de Documento</label>
-                            <select class="form-select" id="idTipoDocumento" required>
-                                <option value="" selected disabled>Seleccione un tipo</option>
-                                @* <option value="1">DNI</option>
-                                <option value="2">Carnet de Extranjería</option>
-                                <option value="3">Pasaporte</option> *@
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="nroDocumento" class="form-label required">Número de Documento</label>
-                            <input type="text" class="form-control" id="nroDocumento" required>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label for="direccion" class="form-label required">Dirección</label>
-                            <input type="text" class="form-control" id="direccion" required>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="ubigeo" class="form-label required">Ubigeo</label>
-                            <input type="text" class="form-control" id="ubigeo" required>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="telefono" class="form-label required">Teléfono</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                <input type="tel" class="form-control" id="telefono" required>
-                            </div>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label for="correoElectronico" class="form-label required">Correo Electrónico</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                <input type="email" class="form-control" id="correoElectronico" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Credenciales de Acceso -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
-                                <i class="bi bi-person-bounding-box nav-icon"></i> <b>CREDENCIALES DE ACCESO </b>
-                            </h6>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="usuarioNombre" class="form-label required">Nombre de Usuario</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input type="text" class="form-control" id="usuarioNombre" required>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="idRol" class="form-label required">Rol de Usuario</label>
-                            <select class="form-select" id="idRol" required>
-                                <option value="" selected disabled>Seleccione un rol</option>
-                                @*                           <option value="1">Administrador</option>
-                                <option value="2">Usuario</option>
-                                <option value="3">Supervisor</option>
-                                <option value="4">Auditor</option> *@
-                            </select>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label for="contrasenia" class="form-label required">Contraseña</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input type="password" class="form-control" id="contrasenia" required>
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="mt-2">
-                                <div class="password-strength strength-0" id="passwordStrength"></div>
-                                <small class="form-text text-muted" id="passwordFeedback">
-                                    La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>CANCELAR
-                </button>
-                <button type="button" class="btn btn-success" id="btnGuardar">
-                    <i class="fas fa-save me-2"></i>GUARDAR USUARIO
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="frmActualizarUsuario" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="usuarioModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header" style="background-color: #2f4050; color: white;">
-                <h5 class="modal-title" id="usuarioModalLabel">
-                    <i class="fas fa-user-plus me-2"></i>ACTUALIZAR USUARIO
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body modal-body-scroll">
-                <form id="usuarioFormUpd">
-                    <!-- Datos Personales -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
-                                <b> <i class="bi bi-person-plus-fill nav-icon"></i> DATOS PERSONALES</b>
-                            </h6>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label for="nombreCompleto" class="form-label required">Nombre Completo</label>
-                            <input type="text" class="form-control" id="nombreCompletoUpd" required>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="idTipoDocumento" class="form-label required">Tipo de Documento</label>
-                            <select class="form-select" id="idTipoDocumentoUpd" required>
-                                <option value="" selected disabled>Seleccione un tipo</option>
-                                @*   <option value="1">DNI</option>
-                                <option value="2">Carnet de Extranjería</option>
-                                <option value="3">Pasaporte</option> *@
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="nroDocumento" class="form-label required">Número de Documento</label>
-                            <input type="text" class="form-control" id="nroDocumentoUpd" required>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label for="direccion" class="form-label required">Dirección</label>
-                            <input type="text" class="form-control" id="direccionUpd" required>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="ubigeo" class="form-label required">Ubigeo</label>
-                            <input type="text" class="form-control" id="ubigeoUpd" required>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="telefono" class="form-label required">Teléfono</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                <input type="tel" class="form-control" id="telefonoUpd" required>
-                            </div>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label for="correoElectronico" class="form-label required">Correo Electrónico</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                <input type="email" class="form-control" id="correoElectronicoUpd" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Credenciales de Acceso -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
-                                <i class="bi bi-person-bounding-box nav-icon"></i> <b>CREDENCIALES DE ACCESO </b>
-                            </h6>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="usuarioNombre" class="form-label required">Nombre de Usuario</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input type="text" class="form-control" id="usuarioNombreUpd" required>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="idRol" class="form-label required">Rol de Usuario</label>
-                            <select class="form-select" id="idRolUpd" required>
-                                <option value="" selected disabled>Seleccione un rol</option>
-                                @*  <option value="1">Administrador</option>
-                                <option value="2">Usuario</option>
-                                <option value="3">Supervisor</option>
-                                <option value="4">Auditor</option> *@
-                            </select>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label for="contraseniaUpd" class="form-label required">Contraseña</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input type="password" class="form-control" id="contraseniaUpd">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordUpd">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="mt-2">
-                                <div class="password-strength strength-0" id="passwordStrengthUpd"></div>
-                                <small class="form-text text-muted" id="passwordFeedbackUpd">
-                                    La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>CANCELAR
-                </button>
-                <button type="button" class="btn btn-success" id="btnGuardarUpd">
-                    <i class="fas fa-save me-2"></i>ACTUALIZAR USUARIO
-                </button>
-            </div>
-        </div>
-    </div>
-</div>

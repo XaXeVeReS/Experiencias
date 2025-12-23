@@ -207,5 +207,20 @@ namespace LIBRERIA_APP.Controllers
                 })
             });
         }
+        [HttpGet]
+        public JsonResult ListarVentasCot(string filtro)
+        {
+            // Llamamos al nuevo método que trae ventas y cotizaciones
+            var datos = new LibreriaDatos().ConsultarVentCotLista(filtro);
+            return Json(new { data = datos });
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerDetalle(int id)
+        {
+            // Usamos el método genérico para cualquier documento
+            var datos = new LibreriaDatos().ObtenerDetalle(id);
+            return Json(datos); // Devolvemos todo el objeto LibreriaModel con su lista Detalle
+        }
     }
 }

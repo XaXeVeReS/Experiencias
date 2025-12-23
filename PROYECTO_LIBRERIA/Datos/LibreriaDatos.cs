@@ -266,5 +266,98 @@ namespace LIBRERIA_APP.Datos
 
             return table;
         }
+        public List<LibreriaModel> ConsultarVentCotLista(string filtro)
+        {
+            List<LibreriaModel> lista = new List<LibreriaModel>();
+            try
+            {
+                using (SqlConnection oconexion = new SqlConnection(cn.GetCadenaSQL()))
+                {
+                    SqlCommand cmd = new SqlCommand("usp_ListarVentCot", oconexion);
+                    cmd.Parameters.AddWithValue("@Filtro", filtro);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    oconexion.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new LibreriaModel()
+                            {
+                                IdCabecera = Convert.ToInt32(dr["IdCabecera"]),
+                                NroDocumentoCliente = dr["NroDocumentoCliente"].ToString(),
+                                NombreCliente = dr["NombreCliente"].ToString(),
+                                ImporteTotal = Convert.ToDecimal(dr["ImporteTotal"]),
+                                TipoMoneda = dr["TipoMoneda"].ToString(),
+                                TipoDocumento = dr["TipoDocDescripcion"].ToString(), // 'Venta' o 'Cotización'
+                                Mensaje = dr["FechaTexto"].ToString() // Usamos Mensaje para la fecha formateada
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception) { lista = new List<LibreriaModel>(); }
+            return lista;
+        }
+        public LibreriaModel ObtenerDetalle(int idCabecera)
+        {
+            LibreriaModel cabecera = new LibreriaModel();
+            // Inicializamos la lista por si acaso, para evitar nulos
+            cabecera.Detalle = new List<DetalleVentaModel>();
+
+            try
+            {
+                using (SqlConnection oconexion = new SqlConnection(cn.GetCadenaSQL()))
+                {
+                    SqlCommand cmd = new SqlCommand("usp_ObtenerDetalle", oconexion);
+                    cmd.Parameters.AddWithValue("@IDCabecera", idCabecera);
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    oconexion.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        // Leer Cabecera (Primer Select del SP)
+                        if (dr.Read())
+                        {
+                            cabecera.IdCabecera = Convert.ToInt32(dr["IdCabecera"]);
+                            cabecera.TipoMoneda = dr["TipoMoneda"].ToString();
+                            cabecera.TipoDocumento = dr["TipoDocumento"].ToString();
+                            cabecera.ImporteTotal = Convert.ToDecimal(dr["ImporteTotal"]);
+                            cabecera.NroDocumentoCliente = dr["NroDocumentoCliente"].ToString();
+                            cabecera.NombreCliente = dr["NombreCliente"].ToString();
+                            cabecera.DireccionCliente = dr["DireccionCliente"].ToString();
+                            cabecera.CodMensaje = "1"; // Indicador de éxito
+                        }
+
+                        // Leer Detalle (Segundo Select del SP)
+                        if (dr.NextResult())
+                        {
+                            while (dr.Read())
+                            {
+                                cabecera.Detalle.Add(new DetalleVentaModel
+                                {
+                                    SKU = dr["SKU"].ToString(),
+                                    Descripcion = dr["Descripcion"].ToString(),
+                                    Cantidad = Convert.ToDecimal(dr["Cantidad"]),
+                                    PrecioUnitario = Convert.ToDecimal(dr["PrecioUnitario"]),
+                                    Descuento = Convert.ToDecimal(dr["Descuento"]),
+                                    SubTotal = Convert.ToDecimal(dr["Subtotal"])
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // En caso de error, reseteamos y enviamos el mensaje
+                cabecera = new LibreriaModel();
+                cabecera.Detalle = new List<DetalleVentaModel>();
+                cabecera.CodMensaje = "0";
+                cabecera.Mensaje = "Error al obtener el documento: " + ex.Message;
+            }
+
+            return cabecera;
+        }
     }
 }
