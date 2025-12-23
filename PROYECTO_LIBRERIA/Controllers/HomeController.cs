@@ -26,6 +26,10 @@ namespace LIBRERIA_APP.Controllers
         [Authorize]
         public IActionResult IndexInformativo()
         {
+            ViewBag.NombreCompleto = User.Identity.Name; 
+            ViewBag.Rol = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            ViewBag.UsuarioLogin = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             return View();
         }
 

@@ -3,20 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sidebar Responsive - ASP.NET Core Compatible</title>
+    <title>SysLibreria - Menú Directo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/2.1.5/css/dataTables.dataTables.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.dataTables.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/fixedcolumns/5.0.1/css/fixedColumns.dataTables.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/fixedheader/4.0.1/css/fixedHeader.dataTables.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
-
 
     <link href="~/css/Sweet2.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/menu.css" asp-append-version="true" />
@@ -25,224 +17,137 @@
 
     <nav class="sidebar d-flex flex-column" id="sidebar" aria-label="Sidebar">
         <div class="sidebar-header">
-            <img src="~/img/58596975_9391714(1).png" />
+            <img src="~/img/58596975_9391714(1).png" alt="Logo" />
             <span class="menu-text">SysLibreria</span>
         </div>
 
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a class="nav-link" asp-action="IndexInformativo" asp-controller="Home">
-                    <i class="bi bi-gear-fill nav-icon"> </i>
-                    <span class="menu-text">INFORMACION</span>
+                    <i class="bi bi-info-circle-fill nav-icon"></i>
+                    <span class="menu-text">INFORMACIÓN</span>
                 </a>
             </li>
-            <!-- ITEM NORMAL -->
+
             @if (User.IsInRole("ADMINISTRADOR"))
             {
                 <li class="nav-item">
                     <a class="nav-link" asp-action="GestionUsuario" asp-controller="Home">
-                        <i class="bi bi-gear-fill nav-icon"> </i>
+                        <i class="bi bi-people-fill nav-icon"></i>
                         <span class="menu-text">USUARIOS</span>
                     </a>
                 </li>
             }
-            <!-- GRUPO 1 -->
+
             @if (User.IsInRole("ADMINISTRADOR"))
             {
-                <li class="nav-item nav-group">
-                    <a class="nav-link nav-group-toggle">
-                        <i class="bi bi-person-circle nav-icon"></i>
-                        <span class="menu-text">CONFIGURACION</span>
-                        <i class="bi bi-caret-down-fill ms-auto"></i>
+                <li class="nav-item">
+                    <a class="nav-link" asp-action="IndexProducto" asp-controller="Productos">
+                        <i class="bi bi-box-seam-fill nav-icon"></i>
+                        <span class="menu-text">PRODUCTOS</span>
                     </a>
-                    <ul class="nav-group-items list-unstyled">
-                        <li class="nav-item"><a class="nav-link" asp-action="IndexProducto" asp-controller="Productos"> <i class="bi bi-gear-fill nav-icon"> </i> PRODUCTOS</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-action="StockAlmacen" asp-controller="Productos"> <i class="bi bi-gear-fill nav-icon"></i> STOCK ALMACEN</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-action="CategoriasProductos" asp-controller="Productos"> <i class="bi bi-gear-fill nav-icon"></i> CATEGORIAS PROD.</a></li>
-                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-action="StockAlmacen" asp-controller="Productos">
+                        <i class="bi bi-database-fill-check nav-icon"></i>
+                        <span class="menu-text">STOCK ALMACÉN</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-action="CategoriasProductos" asp-controller="Productos">
+                        <i class="bi bi-tags-fill nav-icon"></i>
+                        <span class="menu-text">CATEGORÍAS PROD.</span>
+                    </a>
                 </li>
             }
-            <!-- GRUPO 1 configuracion -->
+
             @if (User.IsInRole("ADMINISTRADOR") || User.IsInRole("ANALISTA") || User.IsInRole("SUPERVISOR"))
             {
-                <li class="nav-item nav-group">
-                    <a class="nav-link nav-group-toggle">
-                        <i class="bi bi-puzzle nav-icon"></i>
-                        <span class="menu-text">VENTAS</span>
-                        <i class="bi bi-caret-down-fill ms-auto"></i>
+                <li class="nav-item">
+                    <a class="nav-link" asp-action="GenerarVenta" asp-controller="Libreria">
+                        <i class="bi bi-cart-fill nav-icon"></i>
+                        <span class="menu-text">GENERAR VENTA</span>
                     </a>
-                    <ul class="nav-group-items list-unstyled">
-                        <li class="nav-item"><a class="nav-link" asp-action="GenerarVenta" asp-controller="Libreria"><i class="bi bi-gear-fill nav-icon"> </i> GENERAR VENTA</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-action="GenerarCotizacion" asp-controller="Libreria"><i class="bi bi-gear-fill nav-icon"> </i> GENERAR COTIZACION</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-action="ConsultaVentasCotizacion" asp-controller="Libreria"><i class="bi bi-gear-fill nav-icon"> </i> CONSULTA DE VENTAS</a></li>
-
-                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-action="GenerarCotizacion" asp-controller="Libreria">
+                        <i class="bi bi-file-earmark-text-fill nav-icon"></i>
+                        <span class="menu-text">COTIZACIÓN</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-action="ConsultaVentasCotizacion" asp-controller="Libreria">
+                        <i class="bi bi-search nav-icon"></i>
+                        <span class="menu-text">CONSULTA VENTAS</span>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" asp-action="IndexProveedor" asp-controller="Proveedores">
-                        <i class="bi bi-gear-fill nav-icon"></i> PROVEEDORES
+                        <i class="bi bi-truck nav-icon"></i>
+                        <span class="menu-text">PROVEEDORES</span>
                     </a>
                 </li>
-
-            }
-            @if (User.IsInRole("ADMINISTRADOR") || User.IsInRole("ANALISTA") || User.IsInRole("SUPERVISOR"))
-            {
-                <!-- GRUPO 2 -->
-                <li class="nav-item nav-group">
-                    <a class="nav-link nav-group-toggle">
-                        <i class="bi bi-graph-up nav-icon"></i>
-                        <span class="menu-text">Reportes</span>
-                        <i class="bi bi-caret-down-fill ms-auto"></i>
+                <li class="nav-item">
+                    <a class="nav-link" asp-action="Index" asp-controller="Reportes">
+                        <i class="bi bi-bar-chart-line-fill nav-icon"></i>
+                        <span class="menu-text">REPORTES VENTAS</span>
                     </a>
-                    <ul class="nav-group-items list-unstyled">
-                        <li class="nav-item"><a class="nav-link" asp-action="Index" asp-controller="Reportes"> <i class="bi bi-gear-fill nav-icon"> </i>Ventas</a></li>
-                    </ul>
                 </li>
             }
         </ul>
 
-        <!-- CERRAR SESIÓN AL FINAL -->
         <div class="sidebar-footer mt-auto">
-            <a class="nav-link text-danger fw-bold d-flex align-items-center" id="idCerrarSesion" onclick="Cerrar()">
+            <a class="nav-link text-danger fw-bold d-flex align-items-center" id="idCerrarSesion" style="cursor:pointer;" onclick="Cerrar()">
                 <i class="bi bi-box-arrow-right nav-icon"></i>
                 <span class="menu-text">Cerrar sesión</span>
             </a>
         </div>
     </nav>
 
-    <!-- BOTÓN SIEMPRE VISIBLE -->
     <button class="btn btn-primary toggle-btn" style="background:#2f4050;" id="btnToggle">
         <i class="bi bi-list"></i>
     </button>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="main-content flex-grow-1 p-3">
         <br>
-        @*<div class="container">   </div> *@  
         @RenderBody()
-
     </main>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    @*jquery y datatable*@
-    @*     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> *@
-    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
-    <script src="https://cdn.datatables.net/fixedheader/4.0.1/js/dataTables.fixedHeader.js"></script>
-
-    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> *@
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
     <script>
-         function Cerrar() {
-
-
-            //var usuario = localStorage.getItem("xIdusuario");
-
+        // Función para cerrar sesión
+        function Cerrar() {
             $.ajax({
                 url: "@Url.Action("CerrarSesion", "Home")",
                 type: "POST",
-                success: function (response) {
-                    // Redirigir después del cierre de sesión
+                success: function () {
                     window.location.href = '/Home/Index';
                 },
                 error: function (xhr, status, error) {
-                    // Manejo de errores
-                    alert('Error al intentar cerrar sesión' + error);
+                    Swal.fire('Error', 'No se pudo cerrar sesión', 'error');
                 }
             });
-
         }
 
-
-
-
+        // Lógica del Sidebar (Colapsar/Expandir)
         const sidebar = document.getElementById("sidebar");
         const toggleBtn = document.getElementById("btnToggle");
-        const groups = document.querySelectorAll(".nav-group");
 
-
-
-
-
-        // Cerrar todos los submenús
-        function closeAllGroups() {
-            groups.forEach(g => g.classList.remove("show"));
-        }
-
-        // ==============================
-        // BOTÓN – SIEMPRE COLAPSA / EXPANDE
-        // ==============================
         toggleBtn.onclick = () => {
-
-            // ----- SI ES MÓVIL -----
             if (window.innerWidth <= 768) {
-
-                // Si está visible → ocultar
-                if (sidebar.classList.contains("show-mobile")) {
-                    sidebar.classList.remove("show-mobile");
-                    closeAllGroups();
-                }
-                else {
-                    // Si está oculto → mostrar
-                    sidebar.classList.add("show-mobile");
-                }
-
-                return;
+                sidebar.classList.toggle("show-mobile");
+            } else {
+                sidebar.classList.toggle("collapsed");
             }
-
-            // ----- SI ES ESCRITORIO -----
-
-            // Si está colapsado → expandir
-            if (sidebar.classList.contains("collapsed")) {
-                sidebar.classList.remove("collapsed");
-                return;
-            }
-
-            // Si está expandido → colapsar
-            sidebar.classList.add("collapsed");
-            closeAllGroups();
         };
-
-        // ==============================
-        // SUBMENÚS
-        // ==============================
-        document.querySelectorAll(".nav-group-toggle").forEach(toggle => {
-            toggle.addEventListener("click", e => {
-                e.preventDefault();
-
-                // No permitir abrir submenús colapsado
-                if (sidebar.classList.contains("collapsed")) return;
-
-                const parent = toggle.closest(".nav-group");
-                const open = parent.classList.contains("show");
-
-                closeAllGroups();
-
-                if (!open) parent.classList.add("show");
-            });
-        });
     </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
