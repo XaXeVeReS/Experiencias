@@ -1,0 +1,121 @@
+﻿
+@{
+    ViewData["Title"] = "IndexInformativo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>IndexInformativo</h1>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información del Sistema</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .user-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 10px 10px 0 0;
+            padding: 20px;
+        }
+
+        .system-header {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: #333;
+            border-radius: 10px 10px 0 0;
+            padding: 20px;
+        }
+
+        .module-badge {
+            margin: 5px;
+            font-size: 0.85rem;
+        }
+
+        .alert-warning {
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <!-- Información del Usuario -->
+        <div class="card mb-5">
+            <div class="user-header">
+                <h2 class="mb-0">Información del Usuario</h2>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h5 class="text-primary">Datos Personales</h5>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre Completo:</label>
+                            <p class="form-control-plaintext"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Usuario:</label>
+                            <p class="form-control-plaintext"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Rol:</label>
+                            <p class="form-control-plaintext"><span class="badge bg-primary"></span></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-primary">Módulos Accesibles</h5>
+                        <div class="d-flex flex-wrap">
+                            <span class="badge bg-success module-badge">Generar Venta</span>
+                            <span class="badge bg-success module-badge">Generar Cotizacion</span>
+                            <span class="badge bg-success module-badge">Consultar Venta </span>
+                            <span class="badge bg-success module-badge">Ventas</span>
+                            <span class="badge bg-success module-badge">Configuración</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del Sistema -->
+        <div class="card">
+            <div class="system-header">
+                <h2 class="mb-0">Información del Sistema</h2>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mt-1">
+                    <div class="col-md-12 col-lg-12 align-items-center">
+                        <div class="alert alert-warning">
+                            <h5 class="text-black-50 text-center" style="letter-spacing: 1px;">
+                                Se recomienda tener en cuenta el cierre de sesión al finalizar su labor, el sistema le mostrará una pantalla emergente cada 10 minutos cuando deje de usar el sistema mientras su sesión esta activa, indicando si desea cerrar o continuar.
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-12 col-lg-12 align-items-center">
+                        <div class="alert alert-info">
+                            <h5 class="text-black-50 text-center" style="letter-spacing: 1px;">
+                                El sistema está integrado con el control de roles lo que no le permitirá ingresar ciertas áreas del sistema sino tiene asignado el rol el especifico.
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+             
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

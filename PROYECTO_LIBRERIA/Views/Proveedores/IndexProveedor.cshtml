@@ -1,0 +1,259 @@
+﻿@{
+    ViewData["Title"] = "Proveedores";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card mt-3">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-truck"></i> Proveedores</span>
+        <button class="btn btn-success btn-sm" onclick="abrirModalNuevo()">
+            <i class="bi bi-plus-circle"></i> Nuevo proveedor
+        </button>
+    </div>
+    <div class="card-body">
+        <table id="tblProveedores" class="table table-striped table-bordered w-100">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Doc</th>
+                    <th>Nombre / Razón Social</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Activo</th>
+                    <th style="width: 120px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="modalProveedor" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalProveedorLabel">Nuevo proveedor</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="txtEntidadId" />
+
+                <div class="mb-3">
+                    <label class="form-label">Tipo Documento</label>
+                    <select id="cboTipoDoc" class="form-select">
+                        <option value="">-- Seleccione --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nro Documento</label>
+                    <input type="text" id="txtNroDoc" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre / Razón Social</label>
+                    <input type="text" id="txtNombreRazon" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Dirección</label>
+                    <input type="text" id="txtDireccion" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="txtEmail" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" id="txtTelefono" class="form-control" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarProveedor()">
+                    <i class="bi bi-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let tabla;
+        let modal;
+
+        $(document).ready(function () {
+            modal = new bootstrap.Modal(document.getElementById('modalProveedor'));
+            cargarTabla();
+            cargarTipoDocumentoCombo();
+        });
+
+        function cargarTabla() {
+            tabla = $('#tblProveedores').DataTable({
+                ajax: {
+                    url: '@Url.Action("ProveedoresLista_Controller", "Proveedores")',
+                    type: 'GET',
+                    datatype: 'json'
+                },
+                columns: [
+                    { data: "entidadId" },
+                    {
+                        data: null,
+                        render: d => `${d.idTipoDocumento ?? ''}-${d.nroDocumento ?? ''}`
+                    },
+                    { data: "nombreRazon" },
+                    { data: "email" },
+                    { data: "telefono" },
+                    {
+                        data: "activo",
+                        render: a => (a ? "SI" : "NO")
+                    },
+                    {
+                        data: null,
+                        render: function (d) {
+                            const btnEstado = d.activo
+                              ? `<button class="btn btn-sm btn-warning" onclick="cambiarEstado(${d.entidadId}, false)"><i class="bi bi-x-circle"></i></button>`
+                              : `<button class="btn btn-sm btn-success" onclick="cambiarEstado(${d.entidadId}, true)"><i class="bi bi-check-circle"></i></button>`;
+
+                            return `
+                              <button class="btn btn-sm btn-primary me-1" onclick="editarProveedor(${d.entidadId})">
+                                <i class="bi bi-pencil-square"></i>
+                              </button>
+                              ${btnEstado}
+                            `;
+                        },
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                pageLength: 5,
+                language: { url: "https://cdn.datatables.net/plug-ins/2.1.5/i18n/es-MX.json" }
+            });
+        }
+
+         function cargarTipoDocumentoCombo() {
+            $.ajax({
+                url: '@Url.Action("TipoDocumentoLista_Controller", "TipoDocumento")',
+                type: 'GET',
+                success: function (res) {
+                    const data = res.data || [];
+                    const soloRuc = data.filter(x => x.siglas === "RUC" || x.idTipoDocumento === 2);
+                    const $cbo = $('#cboTipoDoc');
+                    $cbo.empty();
+                    $cbo.append('<option value="">-- Seleccione --</option>');
+
+                    soloRuc.forEach(function (t) {
+                        const texto = `${t.siglas ?? ''} - ${t.documento ?? ''}`.trim();
+                        $cbo.append(`<option value="${t.idTipoDocumento}">${texto}</option>`);
+                    });
+                },
+                error: function () {
+                    Swal.fire('Error', 'No se pudieron cargar los tipos de documento.', 'error');
+                }
+            });
+        }
+
+
+        function abrirModalNuevo() {
+            $('#txtEntidadId').val(0);
+            $('#cboTipoDoc').val('');
+            $('#txtNroDoc').val('');
+            $('#txtNombreRazon').val('');
+            $('#txtDireccion').val('');
+            $('#txtEmail').val('');
+            $('#txtTelefono').val('');
+            $('#modalProveedorLabel').text('Nuevo proveedor');
+            modal.show();
+        }
+
+        function editarProveedor(entidadId) {
+            $.ajax({
+                url: '@Url.Action("ProveedoresObtener_Controller", "Proveedores")',
+                type: 'GET',
+                data: { entidadId },
+                success: function (d) {
+                    $('#txtEntidadId').val(d.entidadId);
+                    $('#cboTipoDoc').val(d.idTipoDocumento ?? '');
+                    $('#txtNroDoc').val(d.nroDocumento ?? '');
+                    $('#txtNombreRazon').val(d.nombreRazon ?? '');
+                    $('#txtDireccion').val(d.direccion ?? '');
+                    $('#txtEmail').val(d.email ?? '');
+                    $('#txtTelefono').val(d.telefono ?? '');
+                    $('#modalProveedorLabel').text('Editar proveedor');
+                    modal.show();
+                },
+                error: function () {
+                    Swal.fire('Error', 'No se pudo obtener el proveedor.', 'error');
+                }
+            });
+        }
+
+        function guardarProveedor() {
+            const entidadId = parseInt($('#txtEntidadId').val() || "0");
+
+            const modelo = {
+                entidadId: entidadId,
+                idTipoDocumento: $('#cboTipoDoc').val() ? parseInt($('#cboTipoDoc').val()) : null,
+                nroDocumento: $('#txtNroDoc').val(),
+                nombreRazon: $('#txtNombreRazon').val(),
+                direccion: $('#txtDireccion').val(),
+                email: $('#txtEmail').val(),
+                telefono: $('#txtTelefono').val()
+            };
+
+            if (!modelo.nombreRazon) {
+                Swal.fire('Validación', 'El nombre/razón social es obligatorio.', 'warning');
+                return;
+            }
+
+            const url = (entidadId === 0)
+                ? '@Url.Action("ProveedoresCrear_Controller", "Proveedores")'
+                : '@Url.Action("ProveedoresActualizar_Controller", "Proveedores")';
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: JSON.stringify(modelo),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data.codMensaje === "1" || data.codMensaje === 1) {
+                        Swal.fire('Correcto', data.mensaje, 'success');
+                        modal.hide();
+                        tabla.ajax.reload();
+                    } else {
+                        Swal.fire('Advertencia', data.mensaje || 'Ocurrió un problema.', 'warning');
+                    }
+                },
+                error: function () {
+                    Swal.fire('Error', 'Error al guardar el proveedor.', 'error');
+                }
+            });
+        }
+
+        function cambiarEstado(entidadId, activo) {
+            $.ajax({
+                url: '@Url.Action("ProveedoresCambiarEstado_Controller", "Proveedores")',
+                type: 'POST',
+                data: { entidadId, activo },
+                success: function (data) {
+                    if (data.codMensaje === "1" || data.codMensaje === 1) {
+                        Swal.fire('Ok', data.mensaje, 'success');
+                        tabla.ajax.reload();
+                    } else {
+                        Swal.fire('Advertencia', data.mensaje || 'Ocurrió un problema.', 'warning');
+                    }
+                },
+                error: function () {
+                    Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
+                }
+            });
+        }
+    </script>
+}

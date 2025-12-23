@@ -1,0 +1,42 @@
+﻿body {
+
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden; /* Oculta scroll horizontal y vertical */
+}
+
+body {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(rgba(4, 48, 109),50%, white);
+    animation: gradienteAnimado 10s ease infinite;
+    font-family: 'Roboto', sans-serif;
+    background-size: cover; /* Ajusta la imagen para cubrir todo el área */
+    background-position: center center; /* Centra la imagen */
+    background-repeat: no-repeat; /* No repite la imagen */
+    background-attachment: fixed; /* Fondo fijo */
+
+    z-index: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: darkgray; /* Color alternativo si no carga la imagen */
+    color: black; /* Color del texto */
+}
+@keyframes gradienteAnimado {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}

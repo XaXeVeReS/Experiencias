@@ -1,0 +1,1032 @@
+﻿@{
+    ViewData["Title"] = "GestionUsuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Scripts
+{
+    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> *@
+
+    <script>
+        $(document).ready(function () {
+            ufn_UsuarioTablaCargar();
+            CargarUsuarioIndicadores();
+        });
+
+        function ufn_UsuarioTablaCargar() {
+            $('#tblUsuarioLista').DataTable({
+                "ajax": {
+                    "url": "@Url.Action("UsuariosListaGeneral_Controller", "Home")",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data" : "entidadId" },
+                    { "data" : "usuario" },
+                    { "data" : "codigo" },
+                    { "data" : "email" },
+                    { "data" : "nombreRazon" },
+                    { "data" : "activo",
+                           "render": function (data) {
+                            if (data === true || data === "true" || data == 1) {
+                                return `<i class="bi bi-toggle-on text-success" style="font-size: 1.5rem;"></i>`;
+                            } else {
+                                return `<i class="bi bi-toggle-off text-danger" style="font-size: 1.5rem;"></i>`;
+                            }
+                        }
+                    },
+                    { "data" : "fechaRegistro" },
+                    {"render": function (data, type, row) {
+                            return `<button id="IDcarga" type="button" onclick="cargar(${row.entidadId})" class="btn btn-primary" data-id="${row.entidadId}"
+                                   data-bs-toggle="modal" data-bs-target="#frmActualizarUsuario"><i class="bi bi-pencil-square"></i> </button>`;
+                        }
+                    }
+                ],
+                "language": {
+                    url: "https://cdn.datatables.net/plug-ins/2.1.5/i18n/es-MX.json"
+                },
+                "columnDefs": [
+                        { "width": "3%", "targets": 0 } ,// 👉 ITEM
+                        { "width": "5%", "targets": 5 } // 👉 ESTADO
+                ],
+                // columnDefs: [
+                //     {
+                //         //ocultar columna Id empleado por el  id 0 de la columna
+                //         targets: 0,
+                //         visible: false
+                //     }
+                // ],
+                buttons: [
+                    {
+                        extend: "excelHtml5",
+                        text: "Exportar Excel",
+                        filename: "Reporte de Empleados",
+                        title: "",
+                        exportOptions: {
+                            columns: [1, 2, 3, 4, 5, 6, 7, 8]
+                        },
+                        className: "btn-exportar-excel"
+                    },
+                    {
+                        extend: "pdfHtml5",
+                        text: "Exportar PDF",
+                        filename: "Reporte de Empleados PDF",
+                        title: "",
+                        exportOptions: {
+                            columns: [1, 2, 3, 4, 5, 6, 7, 8]
+                        },
+                        className: "btn-exportar-PDF"
+
+                    },
+                    {
+                        extend: "print",
+                        filename: "Reporte de Empleados Impresión",
+                        title: "",
+                        exportOptions: {
+                            columns: [1, 2, 3, 4, 5, 6, 7, 8]
+                        },
+                        className: "btn-exportar-Imprimir"
+                    },
+                    "pageLength"
+                ],
+                initComplete: function () {
+                    this.api()
+                        .columns()
+                        .every(function () {
+                            let column = this;
+                            let title = column.footer().textContent;
+
+                            // Create input element
+                            let input = document.createElement('input');
+                            input.placeholder = title;
+                            column.footer().replaceChildren(input);
+
+                            // Event listener for user input
+                            input.addEventListener('keyup', () => {
+                                if (column.search() !== this.value) {
+                                    column.search(input.value).draw();
+                                }
+                            });
+                        });
+                },
+                fixedHeader: {
+                    footer: true
+                }
+            });
+        };
+        function CargarComboRol() {
+            $.ajax({
+                url: '@Url.Action("RolLista_Controller", "Home")',
+                type: "GET",
+                datatype: "json",
+                success: function (response) {
+                    $("#idRol").empty().append('<option value="">Seleccionar</option>');
+                    $.each(response, function (i, elemento) {
+                        $("#idRol").append(
+                            $("<option>").attr({ "value": elemento.idrol }).text(elemento.rolnombre)
+                        );
+                    });
+                }
+            });
+        };
+        function CargarComboTipoDocumento() {
+
+            //var Xvalor = $("#cboEmpresa").val();
+            $.ajax({
+                url: '@Url.Action("TipoDocumentoLista_Controller", "Home")',
+                type: "GET",
+                datatype: "json",
+                success: function (response) {
+                    $("#idTipoDocumento").empty().append('<option value="">Seleccionar</option>');
+                    $.each(response, function (i, elemento) {
+                        $("#idTipoDocumento").append(
+                            $("<option>").attr({ "value": elemento.idTipoDocumento }).text(elemento.documento)
+                        );
+                    });
+                }
+            });
+        };
+        function CargarComboRolUpd() {
+            $.ajax({
+                url: '@Url.Action("RolLista_Controller", "Home")',
+                type: "GET",
+                datatype: "json",
+                success: function (response) {
+                    $("#idRolUpd").empty().append('<option value="">Seleccionar</option>');
+                    $.each(response, function (i, elemento) {
+                        $("#idRolUpd").append(
+                            $("<option>").attr({ "value": elemento.idrol }).text(elemento.rolnombre)
+                        );
+                    });
+                }
+            });
+        };
+        function CargarComboTipoDocumentoUpd() {
+
+            //var Xvalor = $("#cboEmpresa").val();
+            $.ajax({
+                url: '@Url.Action("TipoDocumentoLista_Controller", "Home")',
+                type: "GET",
+                datatype: "json",
+                success: function (response) {
+                    $("#idTipoDocumentoUpd").empty().append('<option value="">Seleccionar</option>');
+                    $.each(response, function (i, elemento) {
+                        $("#idTipoDocumentoUpd").append(
+                            $("<option>").attr({ "value": elemento.idTipoDocumento }).text(elemento.documento)
+                        );
+                    });
+                }
+            });
+        };
+        function CargarUsuarioIndicadores() {
+
+          //  var Xvalor = $("#cboEmpresa").val();
+            $.ajax({
+                url: '@Url.Action("UsuariosIdndicadores_Controller", "Home")',
+                type: "GET",
+                datatype: "json",
+                success: function (data) {
+
+                    //alert(data.cantUsuarios);
+                    $("#idUSuariosActivos ").text(data.usuariosActivos );
+                    $("#idUsuarioInactivos").text(data.usuariosInactivos);
+
+                    // $("#cboAlmacen").empty().append('<option value="">Seleccionar</option>');
+                    //$.each(response, function (i, elemento) {
+                    //    $("#cboAlmacen").append(
+                     //       $("<option>").attr({ "value": elemento.iDalmacen }).text(elemento.almacen)
+                     ///   );
+                    //});
+                }
+            });
+        };
+        function RegistrarUsuario(xarray) {
+            $.ajax({
+                url: '@Url.Action("UsuariosCrear_Controller", "Home")',
+                type: "POST",
+                data: JSON.stringify(xarray),
+                dataType: "JSON",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                      alert("1");
+                    if (data.codMensaje == "1") {
+                        alert("1");
+                        Swal.fire({
+                            title: 'Usuario Actualizado',
+                            text: data.mensaje,
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload(true); // Recarga completa de la página
+                            }
+                        });
+                    } else {
+                        alert("0");
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.mensaje,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar'
+                        });
+                        // En caso de error, no cerramos el modal para que el usuario pueda corregir los datos.
+                    }
+                }
+            });
+        }
+
+        function ActualizarUsuario(xarray) {
+            $.ajax({
+                url: '@Url.Action("UsuariosActualizar_Controller", "Home")',
+                type: "POST",
+                data: JSON.stringify(xarray),
+                dataType: "JSON",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                      //alert("1");
+                    if (data.codMensaje == "1") {
+                        //alert("1");
+                        Swal.fire({
+                            title: 'Usuario Actualizado',
+                            text: data.mensaje,
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload(true); // Recarga completa de la página
+                            }
+                        });
+                    } else {
+                       // alert("0");
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.mensaje,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar'
+                        });
+                        // En caso de error, no cerramos el modal para que el usuario pueda corregir los datos.
+                    }
+                }
+            });
+        }
+
+        $("#btnCrearUsuario").on("click",function()
+        {
+            CargarComboRol();
+            CargarComboTipoDocumento();
+        });
+
+
+        //por modificar
+         function cargar(Valor) {
+                    CargarComboRolUpd();
+                    CargarComboTipoDocumentoUpd();
+            // alert(Valor);
+            $.ajax({
+                url: "@Url.Action("UsuariosObtener_Controller", "Home")",
+                type: 'GET',
+                data: { id: Valor },  // Enviar el idEmpresa al controlador
+                success: function (data) {
+                    // Llenar los campos del modal con los datos recibidos
+                    //alert(data.entidadId + " "+ data.idTipoDocumento + " " + data.nombreRazon );
+                    localStorage.setItem("xIdusuario", data.entidadId);
+                    $('#nombreCompletoUpd').val(data.nombreRazon);
+                    $('#idTipoDocumentoUpd').val(data.idTipoDocumento);
+                    $('#nroDocumentoUpd').val(data.nroDocumento);
+                    $('#direccionUpd').val(data.direccion);
+                    $('#ubigeoUpd').val(data.ubigeo);
+                    $('#telefonoUpd').val(data.telefono);
+                    $('#correoElectronicoUpd').val(data.email);
+                    $('#usuarioNombreUpd').val(data.usuario);
+                    $('#idRolUpd').val(data.idrol);
+
+
+
+                    //$('#chkSesionEdit').prop('checked', data.sesionActivo);
+                    // alert(data.sesion);
+                   // CargarComboAlmacenEdit(data.iDalmacen)
+                },
+                error: function () {
+                    alert('Error al cargar los datos de la empresa.');
+                }
+            });
+        };
+                // Definir la función RegistrarUsuario usando Fetch API
+        // function RegistrarUsuario(xarray) {
+        //     console.log('Datos a enviar:', xarray);
+
+        //     fetch('@Url.Action("UsuariosCrear_Controller", "Home")', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify(xarray)
+        //     })
+        //     .then(response => {
+        //         if (!response.ok) {
+        //             throw new Error('Error en la respuesta del servidor');
+        //         }
+        //         return response.json();
+        //     })
+        //     .then(data => {
+        //         console.log('Respuesta del servidor:', data);
+
+        //         if (data.codMensaje == "1") {
+        //             Swal.fire({
+        //                 title: 'Usuario Creado',
+        //                 text: data.mensaje,
+        //                 icon: 'success',
+        //                 confirmButtonText: 'Aceptar'
+        //             }).then((result) => {
+        //                 if (result.isConfirmed) {
+        //                     // Cerrar modal
+        //                     const modal = bootstrap.Modal.getInstance(document.getElementById('usuarioModal'));
+        //                     if (modal) modal.hide();
+
+        //                     // Limpiar formulario
+        //                     const form = document.getElementById('usuarioForm');
+        //                     if (form) form.reset();
+
+        //                     // Resetear barra de contraseña
+        //                     const strengthBar = document.getElementById('passwordStrength');
+        //                     const feedback = document.getElementById('passwordFeedback');
+        //                     if (strengthBar) strengthBar.className = 'password-strength strength-0';
+        //                     if (feedback) {
+        //                         feedback.textContent = 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.';
+        //                         feedback.className = 'form-text text-muted';
+        //                     }
+
+        //                     // Recargar página si es necesario
+        //                     // location.reload(true);
+        //                 }
+        //             });
+        //         } else {
+        //             Swal.fire({
+        //                 title: 'Error',
+        //                 text: data.mensaje,
+        //                 icon: 'error',
+        //                 confirmButtonText: 'Aceptar'
+        //             });
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //         Swal.fire({
+        //             title: 'Error de conexión',
+        //             text: 'No se pudo conectar con el servidor: ' + error.message,
+        //             icon: 'error',
+        //             confirmButtonText: 'Aceptar'
+        //         });
+        //     });
+        // }
+
+
+            // $("#btnEditarRegistro").click(function () {
+
+            // var xIdPersonaEdit = $('#txtIdPersonaEdit').val();
+            // var xIdUsuarioEdit = $('#txtIdUsuarioEdit').val();
+            // var xTipoDocumentoEdit = $('#cboTipoDocumentoEdit').val();
+            // var xNroDocumentoEdit = $('#txtNroDocumentoEdit').val();
+            // var xNombreEdit = $('#txtNombreEdit').val();
+            // var xApellidoPaternoEdit = $('#txtApellidoPaternoEdit').val();
+            // var xApellidoMaternoEdit = $('#txtApellidoMaternoEdit').val();
+            // var xCorreElectronicoEdit = $('#txtCorreElectronicoEdit').val();
+            // var xDireccionEdit = $('#txtDireccionEdit').val();
+            // var xCargoEdit = $('#cboCargoEdit').val();
+            // var xUsuarioEdit = $('#txtUsuarioEdit').val();
+            // var xContraseniaEdit = $('#txtContraseniaEdit').val();
+            // var xDescripcionEdit = $('#txtDescripcionEdit').val();
+            // var xSesionEdit = $('#chkSesionEdit').is(':checked');
+            // var xActivoEdit = $('#chkActivoEdit').is(':checked');
+            // var xRolEdit = $('#cboRolEdit').val();
+            // var xIDempresa = $('#cboEmpresaEdit').val();
+            // var xIDalmacen = $('#cboAlmacenEdit').val();
+
+            // if (xIdPersonaEdit != "" && xIdUsuarioEdit != "" && xTipoDocumentoEdit != "" && xNroDocumentoEdit != "" && xNombreEdit != "" &&
+            //     xApellidoPaternoEdit != "" && xApellidoMaternoEdit != "" && xCorreElectronicoEdit != "" && xCargoEdit != "0" &&
+            //     xUsuarioEdit != "" && xRolEdit != "" && xIDempresa != "" && xIDalmacen != "") {
+
+            //     var Usuarios = {
+            //         IDpersona: xIdPersonaEdit,
+            //         IDusuario: xIdUsuarioEdit,
+            //         IdTipoDocumento: xTipoDocumentoEdit,
+            //         NumDocumento: xNroDocumentoEdit,
+            //         Nombres: xNombreEdit,
+            //         ApePaterno: xApellidoPaternoEdit,
+            //         ApeMaterno: xApellidoMaternoEdit,
+            //         CorreoElectronico: xCorreElectronicoEdit,
+            //         Direccion: xDireccionEdit,
+            //         IDcargo: xCargoEdit,
+            //         IDempresa: xIDempresa,
+            //         IDalmacen: xIDalmacen,
+            //         Usuario: xUsuarioEdit,
+            //         Contrasenia: xContraseniaEdit,
+            //         Descripcion: xDescripcionEdit,
+            //         SesionActivo: xSesionEdit,
+            //         Estado: xActivoEdit,
+            //         IDrol: xRolEdit
+            //     }
+            //     console.log(Usuarios);
+
+
+            //     $.ajax({
+            //         url: '@Url.Action("UsuarioEditar", "Home")',
+            //         type: "POST",
+            //         data: JSON.stringify(Usuarios),
+            //         dataType: "JSON",
+            //         contentType: "application/json; charset=utf-8",
+            //         success: function (data) {
+            //             if (data.estadoEnvio == "1") {
+            //                 Swal.fire({
+            //                     title: 'Usuario Actualizado',
+            //                     text: data.mensaje,
+            //                     icon: 'success',
+            //                     confirmButtonText: 'Aceptar'
+            //                 }).then((result) => {
+            //                     if (result.isConfirmed) {
+            //                         location.reload(true); // Recarga completa de la página
+            //                     }
+            //                 });
+            //             } else {
+
+            //                 Swal.fire({
+            //                     title: 'Error',
+            //                     text: data.mensaje,
+            //                     icon: 'error',
+            //                     confirmButtonText: 'Aceptar'
+            //                 });
+            //             }
+            //         }
+            //     })
+            // } else {
+            //     Swal.fire({
+            //         title: "Incompleto",
+            //         text: "Completa los campos obligatorios marcados con (*).",
+            //         icon: "warning",
+            //         confirmButtonText: "Aceptar"
+            //     });
+            // }
+
+        //});
+        // $("#cboEmpresa").on("change", function () {
+        //     //alert("prueba");
+        //     CargarComboAlmacen();
+        // });
+        // $("#cboEmpresaEdit").on("change", function () {
+        //     //alert("prueba");
+        //     var xvalor = $("#cboEmpresaEdit").val()
+        //     CargarComboAlmacenEdit(xvalor);
+        // });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle para mostrar/ocultar contraseña
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('contrasenia');
+
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+
+            // Validación de fortaleza de contraseña
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                const strengthBar = document.getElementById('passwordStrength');
+                const feedback = document.getElementById('passwordFeedback');
+
+                let strength = 0;
+                let feedbackText = '';
+
+                // Longitud mínima
+                if (password.length >= 8) strength++;
+
+                // Contiene letras minúsculas y mayúsculas
+                if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+
+                // Contiene números
+                if (/[0-9]/.test(password)) strength++;
+
+                // Contiene símbolos
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                // Actualizar barra de progreso
+                strengthBar.className = 'password-strength strength-' + strength;
+
+                // Actualizar texto de feedback
+                switch(strength) {
+                    case 0:
+                        feedbackText = 'Contraseña muy débil';
+                        feedback.className = 'form-text text-danger';
+                        break;
+                    case 1:
+                        feedbackText = 'Contraseña débil';
+                        feedback.className = 'form-text text-danger';
+                        break;
+                    case 2:
+                        feedbackText = 'Contraseña moderada';
+                        feedback.className = 'form-text text-warning';
+                        break;
+                    case 3:
+                        feedbackText = 'Contraseña buena';
+                        feedback.className = 'form-text text-info';
+                        break;
+                    case 4:
+                        feedbackText = 'Contraseña fuerte';
+                        feedback.className = 'form-text text-success';
+                        break;
+                }
+
+                feedback.textContent = feedbackText;
+            });
+
+            // Manejo del botón Guardar
+            document.getElementById('btnGuardar').addEventListener('click', function() {
+                const form = document.getElementById('usuarioForm');
+
+                // Validar formulario
+                if (!form.checkValidity()) {
+                    // Mostrar mensajes de validación
+                    form.reportValidity();
+                    return;
+                }
+
+                // Recopilar datos del formulario
+                const formData = {
+                    idTipoDocumento: document.getElementById('idTipoDocumento').value,
+                    nroDocumento: document.getElementById('nroDocumento').value,
+                    nombreRazon: document.getElementById('nombreCompleto').value,
+                    direccion: document.getElementById('direccion').value,
+                    ubigeo: document.getElementById('ubigeo').value,
+                    email: document.getElementById('correoElectronico').value,
+                    telefono: document.getElementById('telefono').value,
+                    usuario: document.getElementById('usuarioNombre').value,
+                    contrasenia: document.getElementById('contrasenia').value,
+                    idRol: document.getElementById('idRol').value
+                };
+
+                RegistrarUsuario(formData);
+
+
+
+
+                // Aquí enviarías los datos al servidor
+                //  console.log('Datos a enviar:', formData);
+
+                // Simular envío exitoso
+                //  alert('Usuario creado exitosamente');
+
+                // Cerrar modal
+                // const modal = bootstrap.Modal.getInstance(document.getElementById('usuarioModal'));
+                // modal.hide();
+
+                // Limpiar formulario
+                //form.reset();
+
+                // Resetear barra de contraseña
+                document.getElementById('passwordStrength').className = 'password-strength strength-0';
+                document.getElementById('passwordFeedback').textContent = 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.';
+                document.getElementById('passwordFeedback').className = 'form-text text-muted';
+            });
+                //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 // Toggle para mostrar/ocultar contraseña
+
+
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+
+                 const togglePassword = document.getElementById('togglePasswordUpd');
+                const passwordInput = document.getElementById('contraseniaUpd');
+
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                });
+
+                // Validación de fortaleza de contraseña
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    const strengthBar = document.getElementById('passwordStrengthUpd');
+                    const feedback = document.getElementById('passwordFeedbackUpd');
+
+                    let strength = 0;
+                    let feedbackText = '';
+
+                    // Longitud mínima
+                    if (password.length >= 8) strength++;
+
+                    // Contiene letras minúsculas y mayúsculas
+                    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+
+                    // Contiene números
+                    if (/[0-9]/.test(password)) strength++;
+
+                    // Contiene símbolos
+                    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                    // Actualizar barra de progreso
+                    strengthBar.className = 'password-strength strength-' + strength;
+
+                    // Actualizar texto de feedback
+                    switch(strength) {
+                        case 0:
+                            feedbackText = 'Contraseña muy débil';
+                            feedback.className = 'form-text text-danger';
+                            break;
+                        case 1:
+                            feedbackText = 'Contraseña débil';
+                            feedback.className = 'form-text text-danger';
+                            break;
+                        case 2:
+                            feedbackText = 'Contraseña moderada';
+                            feedback.className = 'form-text text-warning';
+                            break;
+                        case 3:
+                            feedbackText = 'Contraseña buena';
+                            feedback.className = 'form-text text-info';
+                            break;
+                        case 4:
+                            feedbackText = 'Contraseña fuerte';
+                            feedback.className = 'form-text text-success';
+                            break;
+                    }
+
+                    feedback.textContent = feedbackText;
+                });
+
+                // Manejo del botón Guardar
+                document.getElementById('btnGuardarUpd').addEventListener('click', function() {
+                    const form = document.getElementById('usuarioFormUpd');
+
+                    // Validar formulario
+                    if (!form.checkValidity()) {
+                        // Mostrar mensajes de validación
+                        form.reportValidity();
+                        return;
+                    }
+
+                    // Recopilar datos del formulario
+                    const formDataUpd = {
+                        entidadId:  localStorage.getItem("xIdusuario"),
+                        idTipoDocumento: document.getElementById('idTipoDocumentoUpd').value,
+                        nroDocumento: document.getElementById('nroDocumentoUpd').value,
+                        nombreRazon: document.getElementById('nombreCompletoUpd').value,
+                        direccion: document.getElementById('direccionUpd').value,
+                        ubigeo: document.getElementById('ubigeoUpd').value,
+                        email: document.getElementById('correoElectronicoUpd').value,
+                        telefono: document.getElementById('telefonoUpd').value,
+                        usuario: document.getElementById('usuarioNombreUpd').value,
+                        contrasenia: document.getElementById('contraseniaUpd').value,
+                        idRol: document.getElementById('idRolUpd').value
+                    };
+
+                    ActualizarUsuario(formDataUpd);
+
+
+
+
+                    // Aquí enviarías los datos al servidor
+                    //  console.log('Datos a enviar:', formData);
+
+                    // Simular envío exitoso
+                    //  alert('Usuario creado exitosamente');
+
+                    // Cerrar modal
+                    // const modal = bootstrap.Modal.getInstance(document.getElementById('usuarioModal'));
+                    // modal.hide();
+
+                    // Limpiar formulario
+                    //form.reset();
+
+                    // Resetear barra de contraseña
+                    document.getElementById('passwordStrengthUpd').className = 'password-strength strength-0';
+                    document.getElementById('passwordFeedbackUpd').textContent = 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.';
+                    document.getElementById('passwordFeedbackUpd').className = 'form-text text-muted';
+                });
+
+        });
+
+    </script>
+
+}
+<h1>GESTION DE USUARIOS</h1>
+
+
+@*  @await Html.PartialAsync("_PartialDetalleDocumento"); *@
+<!-- DASHBOARD Y BOTONES DE EJECUCIÓN -->
+<div class="row mb-3">
+    <!-- Indicadores del Dashboard -->
+    <div class="col-md-2 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">USUARIOS ACTIVOS:</h5>
+                <p class="card-text fs-4 fw-bold" id="idUSuariosActivos"></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">USUARIOS INACTIVOS:</h5>
+                <p class="card-text fs-4 fw-bold" id="idUsuarioInactivos"></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">ÁREAS:</h5>
+                <p class="card-text fs-4 fw-bold" id="idCantidadAreas">4</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">TOTAL DE MODULOS:</h5>
+                <p class="card-text fs-4 fw-bold" id="idModulos">9</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-2 d-flex justify-content-center align-items-center">
+        <button class="btn btn-success me-2" id="btnCrearUsuario" data-bs-toggle="modal" data-bs-target="#xIDusuarioModal">CREAR NUEVO USUARIO</button>
+        <button class="btn btn-warning me-2" id="btnCrearUsuario2" data-bs-toggle="modal" data-bs-target="#xIDusuarioModal">NUEVO FORMULARIO</button>
+    </div>
+
+</div>
+
+<!-- BARRA DE ESTADO -->
+@*  @await Html.PartialAsync("_PartialBarraEstado"); *@
+
+<!-- TABLA RESPONSIVA CON SCROLL HORIZONTAL -->
+<div class="table-responsive">
+    <table id="tblUsuarioLista" class="table table-striped table-bordered table-hover">
+        <thead style="background-color: #2f4050; color: #fff;">
+            <tr>
+                <th>ITEM</th>
+                <th>USUARIO</th>
+                <th>ROL APP</th>
+                <th>CORREO ELECTRONICO</th>
+                <th>NOMBRE COMPLETO</th>
+                <th>ACTIVO</th>
+                <th>FECHA REGISTRO</th>
+                <th>OPCIONES</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Más filas de ejemplo -->
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="xIDusuarioModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="usuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #2f4050; color: white;">
+                <h5 class="modal-title" id="usuarioModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>CREACION DE USUARIO
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-body-scroll">
+                <form id="usuarioForm">
+                    <!-- Datos Personales -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
+                                <b> <i class="bi bi-person-plus-fill nav-icon"></i> DATOS PERSONALES</b>
+                            </h6>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="nombreCompleto" class="form-label required">Nombre Completo</label>
+                            <input type="text" class="form-control" id="nombreCompleto" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="idTipoDocumento" class="form-label required">Tipo de Documento</label>
+                            <select class="form-select" id="idTipoDocumento" required>
+                                <option value="" selected disabled>Seleccione un tipo</option>
+                                @* <option value="1">DNI</option>
+                                <option value="2">Carnet de Extranjería</option>
+                                <option value="3">Pasaporte</option> *@
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="nroDocumento" class="form-label required">Número de Documento</label>
+                            <input type="text" class="form-control" id="nroDocumento" required>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="direccion" class="form-label required">Dirección</label>
+                            <input type="text" class="form-control" id="direccion" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="ubigeo" class="form-label required">Ubigeo</label>
+                            <input type="text" class="form-control" id="ubigeo" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label required">Teléfono</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input type="tel" class="form-control" id="telefono" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="correoElectronico" class="form-label required">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="correoElectronico" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Credenciales de Acceso -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
+                                <i class="bi bi-person-bounding-box nav-icon"></i> <b>CREDENCIALES DE ACCESO </b>
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="usuarioNombre" class="form-label required">Nombre de Usuario</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="usuarioNombre" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="idRol" class="form-label required">Rol de Usuario</label>
+                            <select class="form-select" id="idRol" required>
+                                <option value="" selected disabled>Seleccione un rol</option>
+                                @*                           <option value="1">Administrador</option>
+                                <option value="2">Usuario</option>
+                                <option value="3">Supervisor</option>
+                                <option value="4">Auditor</option> *@
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="contrasenia" class="form-label required">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="contrasenia" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <div class="password-strength strength-0" id="passwordStrength"></div>
+                                <small class="form-text text-muted" id="passwordFeedback">
+                                    La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>CANCELAR
+                </button>
+                <button type="button" class="btn btn-success" id="btnGuardar">
+                    <i class="fas fa-save me-2"></i>GUARDAR USUARIO
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="frmActualizarUsuario" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="usuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #2f4050; color: white;">
+                <h5 class="modal-title" id="usuarioModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>ACTUALIZAR USUARIO
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body modal-body-scroll">
+                <form id="usuarioFormUpd">
+                    <!-- Datos Personales -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
+                                <b> <i class="bi bi-person-plus-fill nav-icon"></i> DATOS PERSONALES</b>
+                            </h6>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="nombreCompleto" class="form-label required">Nombre Completo</label>
+                            <input type="text" class="form-control" id="nombreCompletoUpd" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="idTipoDocumento" class="form-label required">Tipo de Documento</label>
+                            <select class="form-select" id="idTipoDocumentoUpd" required>
+                                <option value="" selected disabled>Seleccione un tipo</option>
+                                @*   <option value="1">DNI</option>
+                                <option value="2">Carnet de Extranjería</option>
+                                <option value="3">Pasaporte</option> *@
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="nroDocumento" class="form-label required">Número de Documento</label>
+                            <input type="text" class="form-control" id="nroDocumentoUpd" required>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="direccion" class="form-label required">Dirección</label>
+                            <input type="text" class="form-control" id="direccionUpd" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="ubigeo" class="form-label required">Ubigeo</label>
+                            <input type="text" class="form-control" id="ubigeoUpd" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label required">Teléfono</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input type="tel" class="form-control" id="telefonoUpd" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="correoElectronico" class="form-label required">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="correoElectronicoUpd" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Credenciales de Acceso -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2" style="color: #2f4050;">
+                                <i class="bi bi-person-bounding-box nav-icon"></i> <b>CREDENCIALES DE ACCESO </b>
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="usuarioNombre" class="form-label required">Nombre de Usuario</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="usuarioNombreUpd" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="idRol" class="form-label required">Rol de Usuario</label>
+                            <select class="form-select" id="idRolUpd" required>
+                                <option value="" selected disabled>Seleccione un rol</option>
+                                @*  <option value="1">Administrador</option>
+                                <option value="2">Usuario</option>
+                                <option value="3">Supervisor</option>
+                                <option value="4">Auditor</option> *@
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="contraseniaUpd" class="form-label required">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="contraseniaUpd">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordUpd">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <div class="password-strength strength-0" id="passwordStrengthUpd"></div>
+                                <small class="form-text text-muted" id="passwordFeedbackUpd">
+                                    La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>CANCELAR
+                </button>
+                <button type="button" class="btn btn-success" id="btnGuardarUpd">
+                    <i class="fas fa-save me-2"></i>ACTUALIZAR USUARIO
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

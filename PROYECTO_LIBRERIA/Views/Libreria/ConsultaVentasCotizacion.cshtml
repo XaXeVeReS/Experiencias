@@ -1,0 +1,115 @@
+﻿
+@{
+    ViewData["Title"] = "ConsultaVentasCotizacion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>ConsultaVentasCotizacion</h1>
+<div class="card mb-3" style="max-width: 100%;">
+    <div class="card-header bg-dark text-white"> Detalle del Documento </div>
+    <div class="card-body">
+        <div class="row mb-2">
+            <div class="col-md-3"><strong>Documento:</strong> DOC-12345</div>
+            <div class="col-md-3"><strong>Fecha:</strong> 14/11/2025</div>
+            <div class="col-md-3"><strong>Cliente:</strong> Juan Pérez</div>
+            <div class="col-md-3"><strong>Estado:</strong> Pendiente</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-md-3"><strong>Vendedor:</strong> María López</div>
+            <div class="col-md-3"><strong>Tipo Pago:</strong> Contado</div>
+            <div class="col-md-3"><strong>Total:</strong> S/ 1,250.00</div>
+            <div class="col-md-3"><strong>Moneda:</strong> PEN</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12"><strong>Observaciones:</strong> Documento de prueba para integración.</div>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD Y BOTONES DE EJECUCIÓN -->
+<div class="row mb-3">
+    <!-- Indicadores del Dashboard -->
+    <div class="col-md-3 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Items</h5>
+                <p class="card-text fs-4 fw-bold">15</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Pendientes</h5>
+                <p class="card-text fs-4 fw-bold">5</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Procesados</h5>
+                <p class="card-text fs-4 fw-bold">10</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-2 d-flex justify-content-center align-items-center">
+        <button class="btn btn-success me-2">Aprobar</button>
+        <button class="btn btn-danger">Rechazar</button>
+    </div>
+</div>
+
+<!-- BARRA DE ESTADO -->
+@await Html.PartialAsync("_PartialBarraEstado");
+
+
+<!-- TABLA RESPONSIVA CON SCROLL HORIZONTAL -->
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover">
+        <thead style="background-color: #2f4050; color: #fff;">
+            <tr>
+                <th>#</th>
+                <th>Columna 1</th>
+                <th>Columna 2</th>
+                <th>Columna 3</th>
+                <th>Columna 4</th>
+                <th>Columna 5</th>
+                <th>Columna 6</th>
+                <th>Columna 7</th>
+                <th>Columna 8</th>
+                <th>Columna 9</th>
+                <th>Columna 10</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Dato 1</td>
+                <td>Dato 2</td>
+                <td>Dato 3</td>
+                <td>Dato 4</td>
+                <td>Dato 5</td>
+                <td>Dato 6</td>
+                <td>Dato 7</td>
+                <td>Dato 8</td>
+                <td>Dato 9</td>
+                <td>Dato 10</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Dato 1</td>
+                <td>Dato 2</td>
+                <td>Dato 3</td>
+                <td>Dato 4</td>
+                <td>Dato 5</td>
+                <td>Dato 6</td>
+                <td>Dato 7</td>
+                <td>Dato 8</td>
+                <td>Dato 9</td>
+                <td>Dato 10</td>
+            </tr>
+            <!-- Más filas de ejemplo -->
+        </tbody>
+    </table>
+</div>
+

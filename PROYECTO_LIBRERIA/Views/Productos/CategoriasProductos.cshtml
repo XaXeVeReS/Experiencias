@@ -1,0 +1,166 @@
+﻿@{
+    ViewData["Title"] = "Categorías de Productos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card mt-3">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-tags"></i> Categorías de Productos</span>
+        <button class="btn btn-success btn-sm" onclick="abrirModalNueva()">
+            <i class="bi bi-plus-circle"></i> Nueva categoría
+        </button>
+    </div>
+    <div class="card-body">
+        <table id="tblCategorias" class="table table-striped table-bordered w-100">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th style="width: 90px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL PARA CREAR / EDITAR -->
+<div class="modal fade" id="modalCategoria" tabindex="-1" aria-labelledby="modalCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalCategoriaLabel">Nueva categoría</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="idCategoria" />
+
+                <div class="mb-3">
+                    <label for="txtNombre" class="form-label">Nombre</label>
+                    <input type="text" id="txtNombre" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="txtDescripcion" class="form-label">Descripción</label>
+                    <textarea id="txtDescripcion" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarCategoria()">
+                    <i class="bi bi-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let tablaCategorias;
+        let modalCategoria; // instancia de Bootstrap modal
+
+        $(document).ready(function () {
+            // Inicializamos modal bootstrap
+            const modalElement = document.getElementById('modalCategoria');
+            modalCategoria = new bootstrap.Modal(modalElement);
+
+            cargarTablaCategorias();
+        });
+
+        function cargarTablaCategorias() {
+                tablaCategorias = $('#tblCategorias').DataTable({
+                ajax: {
+                    url: '@Url.Action("CategoriasLista_Controller", "Productos")',
+                    type: 'GET',
+                    datatype: 'json'
+                },
+                columns: [
+                    { data: "idCategoria" },
+                    { data: "nombre" },
+                    { data: "descripcion" },
+                    {
+                        data: "idCategoria",
+                        render: function (data) {
+                            return `
+                                <button class="btn btn-sm btn-primary me-1" onclick="editarCategoria(${data})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                            `;
+                        },
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                pageLength: 5,
+                lengthChange: true,   // mostrar u ocultar el combo de entradas
+                searching: true,      // activar búsqueda global
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/2.1.5/i18n/es-MX.json",
+                    lengthMenu: "Mostrar _MENU_ categorías",
+                    search: "Buscar categoría:"
+                }
+            });
+        }
+
+        function abrirModalNueva() {
+            $('#idCategoria').val(0);
+            $('#txtNombre').val('');
+            $('#txtDescripcion').val('');
+            $('#modalCategoriaLabel').text('Nueva categoría');
+            modalCategoria.show();
+        }
+
+        function editarCategoria(id) {
+            $.ajax({
+                url: '@Url.Action("CategoriasObtener_Controller", "Productos")',
+                type: 'GET',
+                data: { id: id },
+                success: function (data) {
+                    $('#idCategoria').val(data.idCategoria);
+                    $('#txtNombre').val(data.nombre);
+                    $('#txtDescripcion').val(data.descripcion);
+                    $('#modalCategoriaLabel').text('Editar categoría');
+                    modalCategoria.show();
+                },
+                error: function () {
+                    Swal.fire('Error', 'No se pudo obtener la categoría.', 'error');
+                }
+            });
+        }
+
+        function guardarCategoria() {
+            const id = parseInt($('#idCategoria').val() || "0");
+            const modelo = {
+                idCategoria: id,
+                nombre: $('#txtNombre').val(),
+                descripcion: $('#txtDescripcion').val()
+            };
+
+            const url = (id === 0)
+                ? '@Url.Action("CategoriasCrear_Controller", "Productos")'
+                : '@Url.Action("CategoriasActualizar_Controller", "Productos")';
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: JSON.stringify(modelo),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data.codMensaje === "1" || data.codMensaje === 1) {
+                        Swal.fire('Correcto', data.mensaje, 'success');
+                        modalCategoria.hide();
+                        tablaCategorias.ajax.reload();
+                    } else {
+                        Swal.fire('Advertencia', data.mensaje || 'Ocurrió un problema.', 'warning');
+                    }
+                },
+                error: function () {
+                    Swal.fire('Error', 'Error al guardar la categoría.', 'error');
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,422 @@
+@model PROYECTO_LIBRERIA.Models.ReporteFiltro
+@{
+    ViewData["Title"] = "Dashboard de Ventas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<style>
+    .card-header-primary {
+        background: linear-gradient(45deg, #0d6efd, #0a58ca);
+        color: white;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #e7f1ff;
+        color: #0c63e4;
+        box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+    }
+    /* Animación de entrada */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }</style>
+
+<div class="container-fluid fade-in">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+        <h2 class="text-primary fw-bold"><i class="bi bi-speedometer2"></i> Dashboard de Gestión</h2>
+        <span class="badge bg-secondary p-2"><i class="bi bi-clock"></i> @DateTime.Now.ToShortDateString()</span>
+    </div>
+
+    <div class="accordion shadow-sm mb-4" id="accordionFiltros">
+        <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="headingFilters">
+                <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="true">
+                    <i class="bi bi-funnel-fill me-2"></i> Configuración de Reporte
+                </button>
+            </h2>
+            <div id="collapseFilters" class="accordion-collapse collapse show" data-bs-parent="#accordionFiltros">
+                <div class="accordion-body bg-light">
+                    <form id="frmReporte">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small fw-bold">TIPO DE REPORTE</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-list-task text-primary"></i></span>
+                                    <select name="Modo" class="form-select fw-bold">
+                                        <optgroup label="Análisis de Ventas">
+                                            <option value="VENTAS_VENDEDOR">Por Vendedor</option>
+                                            <option value="VENTAS_CLIENTE">Por Cliente</option>
+                                            <option value="VENTAS_PRODUCTO">Por Producto</option>
+                                            <option value="VENTAS_CATEGORIA">Por Categoría</option>
+                                            <option value="VENTAS_MEDIO_PAGO">Por Medio de Pago</option>
+                                        </optgroup>
+                                        <optgroup label="Temporalidad">
+                                            <option value="VENTAS_POR_DIA">Ventas Diarias</option>
+                                            <option value="VENTAS_POR_MES">Ventas Mensuales</option>
+                                            <option value="VENTAS_POR_ANO">Ventas Anuales</option>
+                                            <option value="VENTAS_COMPARATIVO_MES">Comparativo Mes vs Mes</option>
+                                        </optgroup>
+                                        <optgroup label="Rankings">
+                                            <option value="VENDEDORES_TOP">Top Vendedores</option>
+                                            <option value="PRODUCTOS_TOP">Productos Top</option>
+                                            <option value="CLIENTES_TOP">Mejores Clientes</option>
+                                        </optgroup>
+                                        <optgroup label="Finanzas">
+                                            <option value="PAGO_RECAUDACION">Recaudación Total</option>
+                                            <option value="INGRESOS_DIA">Ingresos por Día</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label text-muted small fw-bold">RANGO DE FECHAS</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white">Del</span>
+                                    <input asp-for="FechaInicio" type="date" class="form-control" />
+                                    <span class="input-group-text bg-white">Al</span>
+                                    <input asp-for="FechaFin" type="date" class="form-control" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                                    <i class="bi bi-eraser"></i> Limpiar
+                                </button>
+                            </div>
+
+                            <hr class="text-muted my-3">
+
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small">Vendedor</label>
+                                <select id="selUsuario" name="IdUsuario" class="form-select select2-ajax"
+                                        data-url="@Url.Action("BuscarUsuarios")" data-placeholder="Todos"></select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small">Cliente</label>
+                                <select id="selCliente" name="IdCliente" class="form-select select2-ajax"
+                                        data-url="@Url.Action("BuscarClientes")" data-placeholder="Todos"></select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small">Categoría</label>
+                                <select id="selCategoria" name="IdCategoria" class="form-select select2-ajax"
+                                        data-url="@Url.Action("BuscarCategorias")" data-placeholder="Todas"></select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-muted small">Producto</label>
+                                <select id="selProducto" name="SKU" class="form-select select2-ajax"
+                                        data-url="@Url.Action("BuscarProductos")" data-placeholder="Todos"></select>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12 d-flex flex-wrap gap-2 justify-content-between">
+                                <button type="button" class="btn btn-primary btn-lg shadow px-4 btn-action" onclick="generar()">
+                                    <i class="bi bi-search"></i> Generar Reporte
+                                </button>
+
+                                <div class="btn-group shadow-sm">
+                                    <button type="button" class="btn btn-success btn-action" onclick="exportExcel()">
+                                        <i class="bi bi-file-earmark-excel"></i> Excel
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-action" onclick="exportPDF()">
+                                        <i class="bi bi-file-earmark-pdf"></i> PDF
+                                    </button>
+                                </div>
+
+                                <div class="btn-group shadow-sm">
+                                    <button type="button" class="btn btn-outline-dark btn-action" onclick="verGrafico('bar')">
+                                        <i class="bi bi-bar-chart-fill"></i> Barras
+                                    </button>
+                                    <button type="button" class="btn btn-outline-dark btn-action" onclick="verGrafico('line')">
+                                        <i class="bi bi-graph-up"></i> Líneas
+                                    </button>
+                                    <button type="button" class="btn btn-outline-dark btn-action" onclick="verGrafico('pie')">
+                                        <i class="bi bi-pie-chart-fill"></i> Circular
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow border-0 mb-5">
+        <div class="card-header card-header-primary d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-table"></i> Resultados</h5>
+            <span id="badgeCount" class="badge bg-light text-dark">0 registros</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="tbl" class="table table-striped table-hover align-middle w-100">
+                    <thead class="table-light">
+                    </thead>
+                    <tbody>
+                        <tr><td class="text-center p-5 text-muted">Seleccione filtros y presione "Generar Reporte"</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalGrafico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title"><i class="bi bi-graph-up-arrow text-primary"></i> Análisis Visual</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div style="height: 500px; width: 100%;">
+                    <canvas id="canvasGrafico"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        let chartInstance = null;
+
+        $(document).ready(function () {
+            initSelect2();
+        });
+
+        // --- 1. CONFIGURACIÓN SELECT2 (CON TEMA BOOTSTRAP) ---
+        function initSelect2() {
+            $('.select2-ajax').each(function () {
+                const $el = $(this);
+                $el.select2({
+                    theme: 'bootstrap-5', // Diseño moderno
+                    placeholder: $el.data('placeholder') || 'Seleccionar...',
+                    allowClear: true,
+                    width: '100%',
+                    minimumInputLength: 0,
+                    ajax: {
+                        url: $el.data('url'),
+                        type: "GET",
+                        dataType: 'json',
+                        delay: 250,
+                        data: params => ({
+                            filtro: params.term || "",
+                            idCategoria: $('#selCategoria').val()
+                        }),
+                        processResults: function (data) { return { results: data }; }
+                    }
+                });
+            });
+
+            $('#selCategoria').on('change', function () {
+                $('#selProducto').val(null).trigger('change');
+            });
+        }
+
+        // --- 2. LIMPIAR FILTROS ---
+        function limpiarFiltros() {
+            document.getElementById("frmReporte").reset();
+            $('.select2-ajax').val(null).trigger('change');
+            const today = new Date().toISOString().split('T')[0];
+            // Opcional: restablecer fechas a hoy si quieres
+            // $('input[type="date"]').val(today);
+            Swal.fire({
+                toast: true, position: 'top-end', icon: 'info',
+                title: 'Filtros reiniciados', showConfirmButton: false, timer: 1500
+            });
+        }
+
+        // --- 3. UI LOADING ---
+        function toggleLoading(isLoading) {
+            const btns = $('.btn-action');
+            if (isLoading) {
+                btns.prop('disabled', true);
+                let timerInterval;
+                Swal.fire({
+                    title: 'Procesando...',
+                    html: 'Generando datos, por favor espere.',
+                    timerProgressBar: true,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+            } else {
+                btns.prop('disabled', false);
+                Swal.close();
+            }
+        }
+
+        // --- 4. GENERAR REPORTE ---
+        function generar() {
+            toggleLoading(true);
+            var data = new FormData(document.getElementById("frmReporte"));
+
+            fetch("/Reportes/Generar", { method: "POST", body: data })
+                .then(r => {
+                    if (!r.ok) throw new Error("Error del servidor");
+                    return r.json();
+                })
+                .then(lista => {
+                    renderTable(lista);
+                    $('#badgeCount').text(lista.length + " registros");
+
+                    if (lista.length > 0) {
+                        // Colapsar filtros en móviles para ver resultados
+                        if (window.innerWidth < 768) {
+                            $('#collapseFilters').collapse('hide');
+                        }
+                    } else {
+                        Swal.fire('Sin resultados', 'Intente cambiar los filtros.', 'info');
+                    }
+                })
+                .catch(err => Swal.fire('Error', err.message, 'error'))
+                .finally(() => {
+                     // Reactivar botones, pero mantener Swal cerrado si todo fue bien (ya se muestra la tabla)
+                     $('.btn-action').prop('disabled', false);
+                     if (Swal.isVisible() && Swal.getTitle()?.textContent === 'Procesando...') Swal.close();
+                });
+        }
+
+        function renderTable(lista) {
+            if ($.fn.DataTable.isDataTable('#tbl')) { $('#tbl').DataTable().destroy(); }
+            const tbl = document.getElementById("tbl");
+            tbl.innerHTML = "";
+
+            if (!lista || lista.length === 0) {
+                tbl.innerHTML = "<tbody><tr><td class='text-center p-4 text-muted'>No se encontraron datos.</td></tr></tbody>";
+                return;
+            }
+
+            const keys = Object.keys(lista[0]);
+            let head = "<thead><tr>" + keys.map(k => `<th>${k}</th>`).join('') + "</tr></thead>";
+
+            let body = "<tbody>";
+            lista.forEach(row => {
+                body += "<tr>" + keys.map(k => `<td>${formatValue(row[k], k)}</td>`).join('') + "</tr>";
+            });
+            body += "</tbody>";
+
+            tbl.innerHTML = head + body;
+
+            $('#tbl').DataTable({
+                language: { url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" },
+                responsive: true,
+                pageLength: 10,
+                order: [], // Sin orden inicial
+                dom: '<"d-flex justify-content-between mb-2"f>rt<"d-flex justify-content-between mt-2"ip>'
+            });
+        }
+
+        // --- 5. FORMATO INTELIGENTE ---
+        function formatValue(val, key) {
+            if (val === null || val === undefined) return "";
+            // Moneda (detecta palabras clave en el nombre de la columna)
+            if (typeof val === 'number' && /precio|total|venta|monto|ingreso/i.test(key)) {
+                return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(val);
+            }
+            // Fecha ISO
+            if (typeof val === 'string' && val.includes('T') && val.length > 10 && !isNaN(Date.parse(val))) {
+                return new Date(val).toLocaleDateString('es-PE');
+            }
+            return val;
+        }
+
+        // --- 6. EXPORTACIONES ---
+        function exportar(url, tipo) {
+            Swal.fire({ title: `Exportando ${tipo}...`, didOpen: () => Swal.showLoading() });
+            var data = new FormData(document.getElementById("frmReporte"));
+            fetch(url, { method: "POST", body: data })
+                .then(r => r.blob())
+                .then(b => {
+                    Swal.close();
+                    if (b.size < 100) { Swal.fire('Error', 'Archivo vacío', 'warning'); return; }
+                    let a = document.createElement("a");
+                    a.href = URL.createObjectURL(b); a.download = `reporte.${tipo === 'Excel' ? 'xlsx' : 'pdf'}`; a.click();
+                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                    Toast.fire({ icon: 'success', title: `Archivo ${tipo} listo` });
+                })
+                .catch(e => Swal.fire('Error', e.message, 'error'));
+        }
+        function exportExcel() { exportar("/Reportes/ExportExcel", "Excel"); }
+        function exportPDF() { exportar("/Reportes/ExportPDF", "PDF"); }
+
+        // --- 7. GRÁFICOS ---
+        function verGrafico(tipo) {
+            Swal.fire({ title: 'Preparando gráfico...', didOpen: () => Swal.showLoading() });
+            var data = new FormData(document.getElementById("frmReporte"));
+            fetch("/Reportes/Generar", { method: "POST", body: data })
+                .then(r => r.json())
+                .then(lista => {
+                    Swal.close();
+                    if (!lista || lista.length === 0) { Swal.fire('Info', 'Sin datos para graficar', 'info'); return; }
+
+                    var myModal = new bootstrap.Modal(document.getElementById('modalGrafico'));
+                    myModal.show();
+                    setTimeout(() => drawChart(lista, tipo), 300);
+                });
+        }
+
+        function drawChart(lista, tipo) {
+            const keys = Object.keys(lista[0]);
+            const labelKey = keys[0];
+            const valueKey = keys[keys.length - 1]; // Última columna como valor
+
+            const ctx = document.getElementById("canvasGrafico").getContext("2d");
+            if (chartInstance) chartInstance.destroy();
+
+            // Paleta profesional de colores
+            const palette = [
+                '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                '#858796', '#5a5c69', '#f8f9fc', '#2e59d9', '#17a673'
+            ];
+            const bgColors = lista.map((_, i) => palette[i % palette.length]);
+
+            chartInstance = new Chart(ctx, {
+                type: tipo,
+                data: {
+                    labels: lista.map(x => x[labelKey]),
+                    datasets: [{
+                        label: valueKey,
+                        data: lista.map(x => x[valueKey]),
+                        backgroundColor: (tipo === 'pie' || tipo === 'doughnut') ? bgColors : '#4e73df',
+                        borderColor: (tipo === 'pie' || tipo === 'doughnut') ? '#fff' : '#4e73df',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: `Análisis por ${valueKey}`, font: { size: 16 } }
+                    }
+                }
+            });
+        }
+    </script>
+}

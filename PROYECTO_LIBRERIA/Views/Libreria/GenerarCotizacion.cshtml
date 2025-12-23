@@ -1,0 +1,411 @@
+﻿@{
+    ViewData["Title"] = "GenerarCotizacion";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <h3 class="mb-3">Registrar Cotización</h3>
+
+    <form id="formCotizacion">
+
+        <!-- ===================== CABECERA ===================== -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                Datos de la Cotización
+            </div>
+
+            <div class="card-body row g-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">Cliente</label>
+                    <input type="text" id="Cliente" class="form-control" required />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">RUC / DNI</label>
+                    <input type="text" id="Documento" class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Fecha</label>
+                    <input type="date" id="Fecha" class="form-control"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Moneda</label>
+                    <select id="Moneda" class="form-select">
+                        <option value="PEN">PEN</option>
+                        <option value="USD">USD</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Contacto / Atención</label>
+                    <input type="text" id="Atencion" class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Validez (días)</label>
+                    <input type="number" id="Validez" class="form-control" value="7" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Condiciones</label>
+                    <input type="text" id="Condiciones" class="form-control" />
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===================== DETALLE ===================== -->
+        <div class="card mb-3">
+            <div class="card-header bg-dark text-white">
+                Detalle de Productos
+            </div>
+
+            <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Código de Barras</label>
+                        <div class="input-group">
+                            <input type="text" id="CodigoBarras" class="form-control" />
+                            <button type="button" class="btn btn-outline-secondary">
+                                <i class="fas fa-barcode"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">SKU</label>
+                        <div class="input-group">
+                            <input type="text" id="SKU" class="form-control" />
+                            <button type="button" class="btn btn-outline-secondary" id="btnBuscarProducto">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Producto / Descripción</label>
+                        <input type="text" id="ProductoDescripcion" class="form-control" />
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Cantidad</label>
+                        <input type="number" id="Cantidad" class="form-control" value="1" min="1" />
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Precio Unit.</label>
+                        <input type="number" id="PrecioUnitario" class="form-control" step="0.01" />
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Desc. %</label>
+                        <input type="number" id="Descuento" class="form-control" value="0" min="0" max="100" step="0.01" />
+                    </div>
+
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="button" id="btnAgregar" class="btn btn-success w-100">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+
+                <table class="table table-bordered" id="tablaDetalle">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Item</th>
+                            <th>Producto</th>
+                            <th>Código Barras</th>
+                            <th width="90">Cant.</th>
+                            <th width="120">Precio</th>
+                            <th width="120">Desc. %</th>
+                            <th width="120">Subtotal</th>
+                            <th width="50">X</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr class="table-active">
+                            <td colspan="6" class="text-end"><strong>TOTAL:</strong></td>
+                            <td><strong id="TotalCotizacion">0.00</strong></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="button" id="btnCancelar" class="btn btn-secondary">
+                Cancelar
+            </button>
+            <button type="button" id="btnGuardar" class="btn btn-primary">
+                Guardar Cotización
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<!-- MODAL BUSCAR PRODUCTOS -->
+<div class="modal fade" id="modalProductos" tabindex="-1" aria-labelledby="modalProductosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalProductosLabel">Seleccionar producto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tblBuscarProductos" class="table table-striped table-bordered w-100">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Stock mín.</th>
+                            <th style="width: 80px;">Seleccionar</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let detalles = [];
+        let contadorItem = 1;
+        let tablaProductos;
+        let modalProductos;
+
+        function limpiarProducto() {
+            $("#CodigoBarras").val("");
+            $("#SKU").val("");
+            $("#ProductoDescripcion").val("");
+            $("#Cantidad").val(1);
+            $("#PrecioUnitario").val("");
+            $("#Descuento").val(0);
+            $("#CodigoBarras").focus();
+        }
+
+        function actualizarTabla() {
+            const tbody = $("#tablaDetalle tbody");
+            tbody.empty();
+
+            let total = 0;
+
+            detalles.forEach((item, index) => {
+                total += item.subtotal;
+
+                tbody.append(`
+                    <tr>
+                        <td class="text-center">${item.item}</td>
+                        <td>${item.descripcion}</td>
+                        <td>${item.codigoBarras}</td>
+                        <td class="text-center">${item.cantidad}</td>
+                        <td class="text-end">${item.precioUnitario.toFixed(2)}</td>
+                        <td class="text-center">${item.descuento.toFixed(2)}%</td>
+                        <td class="text-end">${item.subtotal.toFixed(2)}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    onclick="eliminarItem(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            $("#TotalCotizacion").text(total.toFixed(2));
+        }
+
+        $("#btnAgregar").click(function () {
+            const codigoBarras = $("#CodigoBarras").val().trim();
+            const sku = $("#SKU").val().trim();
+            const descripcion = $("#ProductoDescripcion").val().trim();
+            const cantidad = parseFloat($("#Cantidad").val() || "0");
+            const precioUnitario = parseFloat($("#PrecioUnitario").val() || "0");
+            const descuento = parseFloat($("#Descuento").val() || "0");
+
+            if (!descripcion || cantidad <= 0 || precioUnitario <= 0) {
+                alert("Completa los datos del producto.");
+                return;
+            }
+
+            let subtotalBruto = cantidad * precioUnitario;
+            let montoDescuento = subtotalBruto * (descuento / 100.0);
+            let subtotal = subtotalBruto - montoDescuento;
+
+            detalles.push({
+                item: contadorItem++,
+                codigoBarras: codigoBarras,
+                sku: sku,
+                descripcion: descripcion,
+                cantidad: cantidad,
+                precioUnitario: precioUnitario,
+                descuento: descuento,
+                subtotal: subtotal
+            });
+
+            actualizarTabla();
+            limpiarProducto();
+        });
+
+        function eliminarItem(index) {
+            if (!confirm("¿Eliminar este producto?")) return;
+
+            detalles.splice(index, 1);
+            detalles.forEach((item, idx) => item.item = idx + 1);
+            contadorItem = detalles.length + 1;
+            actualizarTabla();
+        }
+
+        window.eliminarItem = eliminarItem;
+
+        function initTablaProductos() {
+            tablaProductos = $("#tblBuscarProductos").DataTable({
+                ajax: {
+                    url: "/Productos/ProductosLista_Controller",
+                    type: "GET",
+                    datatype: "json"
+                },
+                columns: [
+                    { data: "sku" },
+                    { data: "nombre" },
+                    { data: "nombreCategoria" },
+                    { data: "precio" },
+                    { data: "stockMin" },
+                    {
+                        data: null,
+                        render: function (data, type, row, meta) {
+                            return `
+                                <button type="button" class="btn btn-success btn-sm"
+                                        onclick="seleccionarProducto(${meta.row})">
+                                    Elegir
+                                </button>`;
+                        },
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                pageLength: 10,
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/2.1.5/i18n/es-MX.json"
+                }
+            });
+        }
+
+        function seleccionarProducto(rowIndex) {
+            const data = tablaProductos.row(rowIndex).data();
+            if (!data) return;
+
+            $("#SKU").val(data.sku);
+            $("#ProductoDescripcion").val(data.nombre);
+            $("#PrecioUnitario").val(data.precio || 0);
+
+            modalProductos.hide();
+        }
+
+        window.seleccionarProducto = seleccionarProducto;
+
+        $(document).ready(function () {
+            const modalProductosEl = document.getElementById("modalProductos");
+            if (modalProductosEl) {
+                modalProductos = new bootstrap.Modal(modalProductosEl);
+            }
+
+            $("#btnBuscarProducto").click(function () {
+                if (!tablaProductos) {
+                    initTablaProductos();
+                }
+                modalProductos.show();
+            });
+        });
+
+        function inferirTipoDocId(valor) {
+            const doc = (valor || "").trim();
+            if (doc.length === 11) return 2; // RUC
+            if (doc.length === 8)  return 1; // DNI
+            return 1;
+        }
+
+        $("#btnGuardar").click(function () {
+            if (detalles.length === 0) {
+                alert("Agrega al menos un producto.");
+                return;
+            }
+
+            const rucDni = $("#Documento").val().trim();
+            const clienteNombre = $("#Cliente").val().trim();
+            const diasValidez = parseInt($("#Validez").val() || "0");
+
+            if (!rucDni || !clienteNombre) {
+                alert("Ingresa RUC/DNI y nombre de cliente.");
+                return;
+            }
+
+            let cot = {
+                tipoDocumento: "COT",
+                tipoMoneda: $("#Moneda").val(),
+                direccion: null,
+                importeTotal: parseFloat($("#TotalCotizacion").text() || "0"),
+
+                entidadCliente: 0,
+
+                idTipoDocumentoCliente: inferirTipoDocId(rucDni),
+                nroDocumentoCliente: rucDni,
+                nombreCliente: clienteNombre,
+                direccionCliente: null,
+                emailCliente: null,
+                telefonoCliente: null,
+
+                diasValidez: isNaN(diasValidez) ? 0 : diasValidez,
+                idCabeceraOrigen: 0,
+
+                detalle: detalles.map(d => {
+                const descuentoUnit = (d.precioUnitario * (d.descuento || 0)) / 100.0; // % -> monto unitario
+                    return {
+                     item: d.item,
+                     sku: d.sku,
+                     cantidad: d.cantidad,
+                     precioUnitario: d.precioUnitario,
+                     descuento: descuentoUnit
+                    };
+                })
+
+            };
+
+            $.ajax({
+                url: "/Libreria/RegistrarCotizacion",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(cot),
+                success: function (resp) {
+                    if (resp && (resp.codMensaje === "1" || resp.codMensaje === 1)) {
+                        alert(resp.mensaje || "Cotización registrada correctamente.");
+                        location.reload();
+                    } else {
+                        alert(resp.mensaje || "Ocurrió un problema al registrar la cotización.");
+                    }
+                },
+                error: function () {
+                    alert("Error al registrar la cotización.");
+                }
+            });
+        });
+
+        $("#btnCancelar").click(function () {
+            if (detalles.length > 0 && !confirm("¿Cancelar la cotización? Se perderán los datos.")) {
+                return;
+            }
+            location.reload();
+        });
+    </script>
+}

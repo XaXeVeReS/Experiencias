@@ -1,0 +1,34 @@
+## [ Archivos de Visual Studio ]
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## [ Archivos de Usuario y Configuración ]
+.env
+appsettings.Development.json
+appsettings.Personal.json
+
+## [ Archivos de Compilación de Node/Librerías ]
+node_modules/
+wwwroot/lib/
+dist/
+
+## [ Archivos del Sistema ]
+.DS_Store
+Thumbs.db
+
+## [ Publicación ]
+*.pubxml
+*.pfx
+*.publishsettings
+
+## [ Logs y Temporales ]
+*.log
+logs/
+Log/
+_logs/
+*.eventlog
