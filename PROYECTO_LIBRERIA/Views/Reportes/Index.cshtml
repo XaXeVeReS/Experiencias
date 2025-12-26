@@ -58,32 +58,25 @@
                     <form id="frmReporte">
                         <div class="row g-3">
                             <div class="col-md-3">
+                                <label class="form-label text-muted small fw-bold">SECCIÓN</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-folder2-open text-primary"></i></span>
+                                    <select id="selSeccion" class="form-select fw-bold" onchange="filtrarModos()">
+                                        <option value="">Seleccione Sección...</option>
+                                        <option value="Analisis">Análisis de Ventas</option>
+                                        <option value="Temporalidad">Temporalidad</option>
+                                        <option value="Rankings">Rankings y KPIs</option>
+                                        <option value="Finanzas">Finanzas e Ingresos</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
                                 <label class="form-label text-muted small fw-bold">TIPO DE REPORTE</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white"><i class="bi bi-list-task text-primary"></i></span>
-                                    <select name="Modo" class="form-select fw-bold">
-                                        <optgroup label="Análisis de Ventas">
-                                            <option value="VENTAS_VENDEDOR">Por Vendedor</option>
-                                            <option value="VENTAS_CLIENTE">Por Cliente</option>
-                                            <option value="VENTAS_PRODUCTO">Por Producto</option>
-                                            <option value="VENTAS_CATEGORIA">Por Categoría</option>
-                                            <option value="VENTAS_MEDIO_PAGO">Por Medio de Pago</option>
-                                        </optgroup>
-                                        <optgroup label="Temporalidad">
-                                            <option value="VENTAS_POR_DIA">Ventas Diarias</option>
-                                            <option value="VENTAS_POR_MES">Ventas Mensuales</option>
-                                            <option value="VENTAS_POR_ANO">Ventas Anuales</option>
-                                            <option value="VENTAS_COMPARATIVO_MES">Comparativo Mes vs Mes</option>
-                                        </optgroup>
-                                        <optgroup label="Rankings">
-                                            <option value="VENDEDORES_TOP">Top Vendedores</option>
-                                            <option value="PRODUCTOS_TOP">Productos Top</option>
-                                            <option value="CLIENTES_TOP">Mejores Clientes</option>
-                                        </optgroup>
-                                        <optgroup label="Finanzas">
-                                            <option value="PAGO_RECAUDACION">Recaudación Total</option>
-                                            <option value="INGRESOS_DIA">Ingresos por Día</option>
-                                        </optgroup>
+                                    <select id="selModo" name="Modo" class="form-select fw-bold" disabled>
+                                        <option value="">Primero elija sección...</option>
                                     </select>
                                 </div>
                             </div>
@@ -205,6 +198,63 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+                const filtrarModos = () => {
+            const seccion = document.getElementById('selSeccion').value;
+            const selModo = document.getElementById('selModo');
+
+            // Limpiar opciones actuales
+            selModo.innerHTML = '';
+
+            const opciones = {
+                "Analisis": [
+                    { v: "VENTAS_VENDEDOR", t: "Ventas por Vendedor" },
+                    { v: "VENTAS_CLIENTE", t: "Ventas por Cliente" },
+                    { v: "VENTAS_PRODUCTO", t: "Ventas por Producto" },
+                    { v: "VENTAS_CATEGORIA", t: "Ventas por Categoría" },
+                    { v: "VENTAS_MEDIO_PAGO", t: "Ventas por Medio de Pago" }
+                ],
+                "Temporalidad": [
+                    { v: "VENTAS_POR_DIA", t: "Ventas Diarias" },
+                    { v: "VENTAS_POR_MES", t: "Ventas Mensuales" },
+                    { v: "VENTAS_POR_ANO", t: "Ventas Anuales" },
+                    { v: "VENTAS_COMPARATIVO_MES", t: "Comparativo Mes a Mes" },
+                    { v: "CLIENTES_HISTORIAL", t: "Historial Detallado de Clientes" }
+                ],
+                "Rankings": [
+                    { v: "PRODUCTOS_TOP", t: "Top 20 Productos Más Vendidos" },
+                    { v: "PRODUCTOS_LOW", t: "Productos con Menos Ventas" },
+                    { v: "PRODUCTOS_TOP_CATEGORIA", t: "Top 5 Productos por Categoría" },
+                    { v: "PRODUCTOS_SIN_MOVIMIENTO", t: "Productos sin Movimiento (Alerta)" },
+                    { v: "VENDEDORES_TOP", t: "Top 10 Mejores Vendedores" },
+                    { v: "VENDEDORES_LOW", t: "Vendedores con Bajo Rendimiento" },
+                    { v: "CLIENTES_TOP", t: "Top 20 Mejores Clientes" },
+                    { v: "CLIENTES_LOW", t: "Clientes con Menos Compras" },
+                    { v: "CLIENTES_INACTIVOS", t: "Lista de Clientes Inactivos" },
+                    { v: "PAGO_TOP", t: "Medios de Pago más Utilizados" }
+                ],
+                "Finanzas": [
+                    { v: "PAGO_RECAUDACION", t: "Recaudación por Medio de Pago" },
+                    { v: "INGRESOS_DIA", t: "Ingresos Totales por Día" },
+                    { v: "INGRESOS_MES", t: "Ingresos Totales por Mes" },
+                    { v: "INGRESOS_ANO", t: "Ingresos Totales por Año" }
+                ]
+            };
+
+            if (seccion && opciones[seccion]) {
+                selModo.disabled = false;
+                opciones[seccion].forEach(opt => {
+                    const el = document.createElement('option');
+                    el.value = opt.v;
+                    el.textContent = opt.t;
+                    selModo.appendChild(el);
+                });
+            } else {
+                selModo.disabled = true;
+                const el = document.createElement('option');
+                el.textContent = "Primero elija sección...";
+                selModo.appendChild(el);
+            }
+        };
         // Uso de variables const/let y Arrow Functions
         let chartInstance = null;
 
