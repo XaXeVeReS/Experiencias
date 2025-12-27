@@ -153,5 +153,18 @@
         public string? code { get; set; }
         public string? description { get; set; }
     }
-
+    public class ApiModel
+    {
+        public string? ruc { get; set; }
+        public string? razonSocial { get; set; }
+        public string? estado { get; set; }
+        public string? condicion { get; set; }
+        public string? direccion { get; set; }
+        public string? departamento { get; set; }
+        public string? provincia { get; set; }
+        public string? distrito { get; set; }
+        public string? ubigeo { get; set; }
+        public string? capital { get; set; }
+        public string? direccionUbigeo { get; set; }
+    }
 }

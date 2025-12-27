@@ -4,7 +4,7 @@
 }
 
 <style>
-    /* Estilos de mejora visual */
+    /* --- ESTILOS VISUALES (Del segundo código) --- */
     .card {
         border: none;
         border-radius: 12px;
@@ -60,12 +60,6 @@
         font-weight: 700;
         color: #0d6efd;
     }
-
-    /* Validaciones visuales */
-    input.error {
-        border-color: #dc3545;
-        background-color: #fff8f8;
-    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -98,14 +92,14 @@
                             <label class="form-label fw-semibold">Nro Documento</label>
                             <div class="input-group shadow-sm">
                                 <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                                <input type="text" id="NroDocumento" class="form-control" placeholder="Buscar..." maxlength="8" />
+                                <input type="text" id="NroDocumento" class="form-control" placeholder="Buscar..." maxlength="11" />
                                 <button type="button" class="btn btn-primary" id="btnBuscarCliente">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <input type="hidden" id="EntidadClienteId" />
+                        <input type="hidden" id="EntidadClienteId" value="0" />
 
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Nombre / Razón Social</label>
@@ -124,7 +118,7 @@
 
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Teléfono</label>
-                            <input type="text" id="Telefono" class="form-control shadow-sm" placeholder="Solo números" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="15" />
+                            <input type="text" id="Telefono" class="form-control shadow-sm" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                         </div>
 
                         <div class="col-md-4">
@@ -242,17 +236,17 @@
         </div>
 
         <div class="row mb-5">
-            <div class="col-6">
+            <div class="col-lg-6 mb-2">
                 <button type="button" id="btnCancelar" class="btn btn-outline-danger btn-lg w-100 btn-action shadow-sm">
                     <i class="bi bi-trash3 me-2"></i>Cancelar Venta
                 </button>
             </div>
-            <div class="col-3">
+            <div class="col-lg-3 mb-2">
                 <button type="button" id="btnGuardar" class="btn btn-primary btn-lg w-100 btn-action shadow-sm">
                     <i class="bi bi-save me-2"></i>Solo Guardar
                 </button>
             </div>
-            <div class="col-3">
+            <div class="col-lg-3 mb-2">
                 <button type="button" id="btnEnviarSunat" class="btn btn-success btn-lg w-100 btn-action shadow-sm" onclick="enviarFacturaSunat()">
                     <i class="bi bi-cloud-upload-fill me-2"></i>Guardar y Enviar SUNAT
                 </button>
@@ -296,7 +290,7 @@
         let tablaProductos;
         let modalProductos;
 
-        // --- VALIDACIONES DE ENTRADA DIRECTA ---
+        // --- VALIDACIONES DE ENTRADA ---
         function validarPositivo(input) {
             if (input.value < 1) input.value = 1;
         }
@@ -306,32 +300,31 @@
             if (input.value > 100) input.value = 100;
         }
 
-        // --- MANEJO DE TIPO DE DOCUMENTO ---
-        $("#TipoDocumento").change(function() {
+        // --- CONFIGURACIÓN DE TIPO DE DOCUMENTO ---
+        $("#TipoDocumento").change(function () {
             const tipo = $(this).val();
             const inputDoc = $("#NroDocumento");
 
-            if(tipo == "1") { // DNI
+            // Reiniciar campo
+            inputDoc.val("");
+            inputDoc.removeAttr("maxlength");
+            inputDoc.removeAttr("oninput");
+
+            if (tipo == "1") { // DNI
                 inputDoc.attr("maxlength", "8");
                 inputDoc.attr("placeholder", "8 dígitos");
-                // Solo permitimos números
                 inputDoc.attr("oninput", "this.value = this.value.replace(/[^0-9]/g, '')");
             } else if (tipo == "2") { // RUC
                 inputDoc.attr("maxlength", "11");
                 inputDoc.attr("placeholder", "11 dígitos");
                 inputDoc.attr("oninput", "this.value = this.value.replace(/[^0-9]/g, '')");
             } else {
-                inputDoc.removeAttr("maxlength");
                 inputDoc.attr("placeholder", "Alfanumérico");
-                // Permitimos cualquier caracter quitando el filtro
-                inputDoc.removeAttr("oninput");
             }
         });
-
-        // Inicializar validación documento
         $("#TipoDocumento").trigger("change");
 
-
+        // --- FUNCIONES PRODUCTOS ---
         function limpiarProducto() {
             $("#CodigoBarras").val("");
             $("#SKU").val("");
@@ -372,12 +365,9 @@
             $("#ImporteTotal").val(total.toFixed(2));
         }
 
-        // --- BOTÓN AGREGAR PRODUCTO (CON VALIDACIONES) ---
         $("#btnAgregar").click(async function () {
-            // 1. Validar Cabecera Primero
             if (!validarCabecera()) return;
 
-            // 2. Validar Datos Producto
             const codigoBarras = $("#CodigoBarras").val().trim();
             const sku = $("#SKU").val().trim();
             const descripcion = $("#ProductoDescripcion").val().trim();
@@ -387,15 +377,15 @@
             const descuento = parseFloat($("#Descuento").val() || "0");
 
             if (!descripcion || cantidad <= 0 || precioUnitario <= 0) {
-                Swal.fire('Atención', 'Seleccione un producto y verifique cantidad/precio', 'warning');
+                Swal.fire('Atención', 'Seleccione un producto y verifique los datos.', 'warning');
                 return;
             }
 
-            // 3. Alerta de Cambio de Precio
+            // Alerta si el precio cambió
             if (precioOriginal > 0 && precioUnitario !== precioOriginal) {
                 const confirmacion = await Swal.fire({
                     title: 'Precio Modificado',
-                    text: `El precio original es S/ ${precioOriginal}. ¿Desea aplicar el nuevo precio de S/ ${precioUnitario}?`,
+                    text: `El precio original es S/ ${precioOriginal}. ¿Aplicar nuevo precio de S/ ${precioUnitario}?`,
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonText: 'Sí, cambiar',
@@ -419,7 +409,7 @@
                 descripcion: descripcion,
                 cantidad: cantidad,
                 precioUnitario: precioUnitario,
-                descuento: descuento,
+                descuento: descuento, // Porcentaje
                 subtotal: subtotal
             });
 
@@ -430,7 +420,6 @@
         function eliminarItem(index) {
             Swal.fire({
                 title: '¿Quitar producto?',
-                text: "Se eliminará de la lista",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -438,37 +427,34 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     detalles.splice(index, 1);
-                    // Renumerar items
                     detalles.forEach((item, idx) => item.item = idx + 1);
                     contadorItem = detalles.length + 1;
                     actualizarTabla();
                 }
-            })
+            });
         }
         window.eliminarItem = eliminarItem;
 
-        // --- VALIDAR CABECERA ---
         function validarCabecera() {
             const nroDoc = $("#NroDocumento").val().trim();
             const nombre = $("#NombreRazonSocial").val().trim();
             const direccion = $("#Direccion").val().trim();
             const tipoDoc = $("#TipoDocumento").val();
 
-            if (!nroDoc) { Swal.fire('Falta Dato', 'Ingrese el Nro de Documento del cliente', 'warning'); return false; }
-            if (tipoDoc == "1" && nroDoc.length != 8) { Swal.fire('Error DNI', 'El DNI debe tener 8 dígitos', 'error'); return false; }
-            if (tipoDoc == "2" && nroDoc.length != 11) { Swal.fire('Error RUC', 'El RUC debe tener 11 dígitos', 'error'); return false; }
-
+            if (!nroDoc) { Swal.fire('Falta Dato', 'Ingrese el Nro de Documento', 'warning'); return false; }
+            if (tipoDoc == "1" && nroDoc.length != 8) { Swal.fire('DNI Inválido', 'Debe tener 8 dígitos', 'error'); return false; }
+            if (tipoDoc == "2" && nroDoc.length != 11) { Swal.fire('RUC Inválido', 'Debe tener 11 dígitos', 'error'); return false; }
             if (!nombre) { Swal.fire('Falta Dato', 'Ingrese Nombre o Razón Social', 'warning'); return false; }
-            if (!direccion) { Swal.fire('Falta Dato', 'Ingrese la Dirección del cliente', 'warning'); return false; }
+            if (!direccion) { Swal.fire('Falta Dato', 'Ingrese la Dirección', 'warning'); return false; }
 
             return true;
         }
 
-        // --- DATATABLE PRODUCTOS ---
+        // --- DATATABLE BUSQUEDA ---
         function initTablaProductos() {
             tablaProductos = $("#tblBuscarProductos").DataTable({
                 ajax: {
-                    url: "/Productos/ProductosLista_Controller", // Ajustar a tu ruta real
+                    url: "/Productos/ProductosLista_Controller",
                     type: "GET",
                     datatype: "json"
                 },
@@ -477,11 +463,11 @@
                     { data: "nombre" },
                     { data: "nombreCategoria" },
                     { data: "precio" },
-                    { data: "stockMin" }, // Asumiendo que esta propiedad viene en tu JSON
+                    { data: "stockMin" },
                     {
                         data: null,
-                        render: function (data, type, row, meta) {
-                            // Convertir objeto a string seguro para pasar por onclick
+                        render: function (data) {
+                            // JSON.stringify seguro para pasar objetos
                             return `<button type='button' class='btn btn-success btn-sm' onclick='seleccionarProducto(${JSON.stringify(data)})'>Elegir</button>`;
                         },
                         orderable: false
@@ -492,20 +478,17 @@
             });
         }
 
-        // Función auxiliar porque pasar objetos directo en onclick HTML a veces falla con comillas
-        window.seleccionarProducto = function(data) {
-             $("#SKU").val(data.sku);
-             $("#ProductoDescripcion").val(data.nombre);
-             $("#PrecioUnitario").val(data.precio || 0);
-             $("#PrecioOriginal").val(data.precio || 0); // Guardamos el original
-             modalProductos.hide();
+        window.seleccionarProducto = function (data) {
+            $("#SKU").val(data.sku);
+            $("#ProductoDescripcion").val(data.nombre);
+            $("#PrecioUnitario").val(data.precio || 0);
+            $("#PrecioOriginal").val(data.precio || 0);
+            modalProductos.hide();
         };
 
         $(document).ready(function () {
-            const modalProductosEl = document.getElementById("modalProductos");
-            if (modalProductosEl) {
-                modalProductos = new bootstrap.Modal(modalProductosEl);
-            }
+            const modalEl = document.getElementById("modalProductos");
+            if (modalEl) { modalProductos = new bootstrap.Modal(modalEl); }
 
             $("#btnBuscarProducto").click(function () {
                 if (!tablaProductos) { initTablaProductos(); }
@@ -513,48 +496,9 @@
             });
         });
 
-
-        // --- GUARDAR VENTA (Local) ---
-        $("#btnGuardar").click(function () {
-            if(!validarCabecera()) return;
-
-            if (detalles.length === 0) {
-                Swal.fire('Error', 'Agrega al menos un producto al detalle.', 'error');
-                return;
-            }
-
-            // Construir Objeto
-            let venta = construirObjetoVenta();
-
-            Swal.fire({
-                title: 'Guardando Venta',
-                text: 'Procesando...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            $.ajax({
-                url: "/Libreria/RegistrarVenta",
-                type: "POST",
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify(venta),
-                success: function (resp) {
-                    Swal.close();
-                    if (resp && (resp.codMensaje === "1" || resp.codMensaje === 1)) {
-                        Swal.fire('Éxito', resp.mensaje || "Venta registrada", 'success')
-                            .then(() => location.reload());
-                    } else {
-                        Swal.fire('Error', resp.mensaje || "Ocurrió un problema", 'error');
-                    }
-                },
-                error: function () {
-                    Swal.fire('Error', 'Error de conexión con el servidor', 'error');
-                }
-            });
-        });
-
-        function construirObjetoVenta(){
-             return {
+        // --- OBJETO VENTA COMPARTIDO ---
+        function construirObjetoVenta() {
+            return {
                 tipoDocumento: "VEN",
                 tipoMoneda: $("#Moneda").val(),
                 direccion: $("#Direccion").val(),
@@ -580,126 +524,53 @@
             };
         }
 
-        $("#btnCancelar").click(function () {
-            if (detalles.length > 0) {
-                Swal.fire({
-                    title: '¿Cancelar?',
-                    text: "Se perderán los datos ingresados",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) location.reload();
-                });
-            } else {
-                location.reload();
-            }
-        });
+        // --- BOTÓN SOLO GUARDAR ---
+        $("#btnGuardar").click(function () {
+            if (!validarCabecera()) return;
+            if (detalles.length === 0) { Swal.fire('Error', 'Agregue productos', 'error'); return; }
 
-        // --- BUSCAR CLIENTE ---
-        $("#btnBuscarCliente").click(function () {
-            const nro = $("#NroDocumento").val().trim();
-            if (!nro) { Swal.fire('Atención', "Ingresa el Nro de Documento.", 'warning'); return; }
+            const venta = construirObjetoVenta();
 
-            Swal.showLoading();
+            Swal.fire({ title: 'Guardando', didOpen: () => Swal.showLoading() });
+
             $.ajax({
-                url: "/Libreria/ClienteBuscarPorDocumento",
-                type: "GET",
-                data: { nroDocumento: nro },
-                success: function (res) {
+                url: "/Libreria/RegistrarVenta",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(venta),
+                success: function (resp) {
                     Swal.close();
-                    if (!res || !res.encontrado) {
-                        Swal.fire('No encontrado', "Cliente no registrado. Llene los datos manualmente.", 'info');
-                        $("#EntidadClienteId").val("0"); // Limpiar ID para que cree uno nuevo
-                        return;
+                    if (resp && resp.codMensaje == "1") {
+                        Swal.fire('Correcto', resp.mensaje || "Venta registrada", 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', resp.mensaje, 'error');
                     }
-                    const c = res.cliente;
-                    $("#EntidadClienteId").val(c.entidadId);
-                    $("#NombreRazonSocial").val(c.nombreRazon);
-                    $("#Direccion").val(c.direccion);
-                    $("#Email").val(c.email);
-                    $("#Telefono").val(c.telefono);
-                    $("#TipoDocumento").val(c.idTipoDocumento);
-
-                    // Disparar evento change para ajustar validaciones si cambia el tipo doc
-                    $("#TipoDocumento").trigger("change");
                 },
-                error: function () { Swal.fire('Error', "Error al buscar cliente.", 'error'); }
+                error: function () { Swal.fire('Error', 'Error de conexión', 'error'); }
             });
         });
 
-        // --- CARGAR COTIZACIÓN ---
-        $("#btnCargarDesdeCotizacion").click(function () {
-            const id = parseInt($("#txtIdCotizacion").val() || "0");
-            if (!id) { Swal.fire('Error', "Ingresa un ID de cotización válido (solo números)", 'error'); return; }
-
-            Swal.showLoading();
-            $.get("/Libreria/CotizacionObtener", { idCabecera: id }, function (resp) {
-                Swal.close();
-                if (!resp || !resp.encontrado) {
-                    Swal.fire('No encontrado', "No existe la cotización o ya fue procesada", 'warning');
-                    return;
-                }
-
-                const c = resp.cabecera;
-                $("#EntidadClienteId").val(c.entidadCliente);
-                $("#TipoDocumento").val(c.idTipoDocumentoCliente).trigger("change");
-                $("#NroDocumento").val(c.nroDocumentoCliente);
-                $("#NombreRazonSocial").val(c.nombreCliente);
-                $("#Direccion").val(c.direccionCliente);
-                $("#Email").val(c.emailCliente);
-                $("#Telefono").val(c.telefonoCliente);
-                $("#Moneda").val(c.tipoMoneda || "PEN");
-                $("#IdCabeceraOrigen").val(c.idCabecera || 0);
-
-                // Cargar Detalle
-                detalles = [];
-                contadorItem = 1;
-                if (resp.detalle && resp.detalle.length > 0) {
-                    resp.detalle.forEach(d => {
-                        const cantidad = d.cantidad || 0;
-                        const precioUnitario = d.precioUnitario || 0;
-                        const descuentoUnit = d.descuento || 0; // BD devuelve monto
-                        const descuentoPct = precioUnitario > 0 ? (descuentoUnit / precioUnitario) * 100.0 : 0;
-                        const subtotal = (cantidad * precioUnitario) - (cantidad * descuentoUnit);
-
-                        detalles.push({
-                            item: contadorItem++,
-                            codigoBarras: "",
-                            sku: d.sku,
-                            descripcion: d.descripcion || "",
-                            cantidad: cantidad,
-                            precioUnitario: precioUnitario,
-                            descuento: descuentoPct,
-                            subtotal: subtotal
-                        });
-                    });
-                }
-                actualizarTabla();
-                Swal.fire('Cargado', 'Cotización importada correctamente', 'success');
-
-            }).fail(function () { Swal.fire('Error', "Error de servidor al buscar cotización", 'error'); });
-        });
-
-        // --- ENVIAR A SUNAT (Simulación Completa) ---
+        // --- BOTÓN ENVIAR SUNAT ---
         function enviarFacturaSunat() {
-            if(!validarCabecera()) return;
+            if (!validarCabecera()) return;
             if (detalles.length === 0) { Swal.fire('Error', 'No hay productos para facturar', 'error'); return; }
 
-            // Guardamos primero en BD interna (opcional, o se manda directo)
-            // Aquí asumimos que se manda el objeto directo
-
-            const venta = construirObjetoVenta(); // Usamos la misma estructura base
-
-            // Cálculos para SUNAT (JSON UBL simplificado)
+            // 1. Construir detalle específico para SUNAT con cálculos de IGV
             let totalIGV = 0;
             let valorVentaTotal = 0;
             const detallesSunat = [];
 
             detalles.forEach((d, index) => {
                 const descuentoUnit = (d.precioUnitario * d.descuento) / 100;
-                const valorUnitario = d.precioUnitario - descuentoUnit;
-                const valorVentaItem = d.cantidad * valorUnitario;
+                // Valor Unitario = PrecioUnitario - Descuento (sin IGV)
+                // OJO: Aquí asumimos que el precio de la lista INCLUYE IGV.
+                // Si tus precios NO incluyen IGV, elimina la división entre 1.18 abajo.
+
+                // Si el precio unitario del input INCLUYE IGV:
+                const precioConIgv = d.precioUnitario;
+                const valorUnitarioSinIgv = precioConIgv / 1.18; // Desglosamos
+
+                const valorVentaItem = d.cantidad * valorUnitarioSinIgv;
                 const igvItem = valorVentaItem * 0.18;
 
                 totalIGV += igvItem;
@@ -708,70 +579,232 @@
                 detallesSunat.push({
                     item: index + 1,
                     sku: d.sku,
+                    unidad: "NIU", // Unidad bienes
                     descripcion: d.descripcion,
                     cantidad: d.cantidad,
-                    precioUnitario: d.precioUnitario,
+                    precioUnitario: precioConIgv, // Precio con impuestos
+                    mtoValorUnitario: valorUnitarioSinIgv.toFixed(2), // Valor sin impuestos
                     mtoValorVenta: valorVentaItem.toFixed(2),
-                    igv: igvItem.toFixed(2)
+                    mtoBaseIgv: valorVentaItem.toFixed(2),
+                    porcentajeIgv: 18,
+                    igv: igvItem.toFixed(2),
+                    tipAfeIgv: 10, // Gravado - Operación Onerosa
+                    totalImpuestos: igvItem.toFixed(2),
+                    mtoPrecioUnitario: precioConIgv.toFixed(2)
                 });
             });
 
+            // 2. Construir JSON UBL
             const facturaJson = {
+                ublVersion: "2.1",
                 tipoOperacion: "0101",
-                fechaEmision: new Date().toISOString(),
-                cliente: {
-                    numDoc: venta.nroDocumentoCliente,
-                    rznSocial: venta.nombreCliente
+                tipoDoc: "01", // Factura
+                serie: "F001",
+                correlativo: "0", // El backend o SUNAT lo asignará o enviamos 0
+                fechaEmision: obtenerFechaEmision(),
+                formaPago: { moneda: $("#Moneda").val(), tipo: "Contado" },
+                tipoMoneda: $("#Moneda").val(),
+                client: {
+                    tipoDoc: $("#TipoDocumento").val() == "2" ? "6" : "1", // 6=RUC, 1=DNI
+                    numDoc: $("#NroDocumento").val(),
+                    rznSocial: $("#NombreRazonSocial").val(),
+                    address: {
+                        direccion: $("#Direccion").val(),
+                        ubigueo: "150101", // Default o dinámico
+                        provincia: "LIMA",
+                        departamento: "LIMA",
+                        distrito: "LIMA"
+                    }
                 },
-                totales: {
-                    mtoOperacionesGravadas: valorVentaTotal.toFixed(2),
-                    mtoIGV: totalIGV.toFixed(2),
-                    totalImpuestos: totalIGV.toFixed(2),
-                    mtoImporteTotal: (valorVentaTotal + totalIGV).toFixed(2)
+                company: {
+                    ruc: "10703784882", // TU RUC EMISOR
+                    razonSocial: "Francisco Jesus Sonco Montes",
+                    nombreComercial: "LIBRERIAS EXPORT SAC",
+                    address: {
+                        direccion: "Direccion empresa",
+                        ubigueo: "040401",
+                        provincia: "AREQUIPA",
+                        departamento: "AREQUIPA",
+                        distrito: "AREQUIPA"
+                    }
                 },
-                detalle: detallesSunat
+                mtoIGV: totalIGV.toFixed(2),
+                totalImpuestos: totalIGV.toFixed(2),
+                valorVenta: valorVentaTotal.toFixed(2),
+                subTotal: valorVentaTotal.toFixed(2),
+                mtoImpVenta: (valorVentaTotal + totalIGV).toFixed(2),
+                details: detallesSunat,
+                legends: [{ code: "1002", value: "SON " + detalles.length + " ITEMS" }]
             };
 
             Swal.fire({
-                title: 'Conectando con SUNAT',
-                html: 'Enviando comprobante electrónico...<br><b>No cierre la ventana</b>',
+                title: 'Enviando a SUNAT',
+                html: 'Generando comprobante electrónico...<br><b>No cierre la ventana</b>',
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading()
             });
 
-            // AJAX REAL A TU ENDPOINT
+            // 3. Enviar al Backend
             $.ajax({
-                url: '/api/ApiSunat/invoice/enviar-sunat',
+                url: '/api/GenerarDoc/FacturaElectronicaGenerar', // Tu Endpoint del primer código
                 type: 'POST',
-                contentType: 'application/json',
                 data: JSON.stringify(facturaJson),
-                success: function (response) {
-                    const codigo = response.sunat?.cdrResponse?.code;
-                    const desc = response.sunat?.cdrResponse?.description || "Procesado";
+                contentType: 'application/json; charset=utf-8',
+                xhrFields: { responseType: 'blob' }, // IMPORTANTE PARA EL PDF
+                success: function (data, status, xhr) {
+                    Swal.close();
 
-                    if (codigo === "0") {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Factura Aceptada!',
-                            html: `SUNAT Responde: <b>${desc}</b><br>Se ha generado el XML y PDF.`,
-                            confirmButtonText: 'Finalizar'
-                        }).then(() => location.reload());
-                    } else {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Observada por SUNAT',
-                            text: desc
-                        });
+                    // Manejar descarga del PDF
+                    let fileName = "FacturaElectronica.pdf";
+                    const disposition = xhr.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.includes('filename=')) {
+                        fileName = disposition.split('filename=')[1].replace(/"/g, '');
                     }
+
+                    const blob = new Blob([data], { type: 'application/pdf' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+
+                    Swal.fire('Éxito', 'Factura generada y descargada.', 'success')
+                        .then(() => location.reload());
                 },
-                error: function (xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error de Envío',
-                        text: 'No se pudo conectar con el servicio de facturación o fue rechazado.'
-                    });
+                error: function () {
+                    Swal.fire('Error SUNAT', 'No se pudo generar el comprobante o fue rechazado.', 'error');
                 }
             });
         }
+
+        // --- UTILIDADES ---
+        function obtenerFechaEmision() {
+            const ahora = new Date();
+            const offsetMs = ahora.getTimezoneOffset() * 60000;
+            const peruTime = new Date(ahora.getTime() - offsetMs - (5 * 60 * 60000));
+            return peruTime.toISOString().slice(0, 19) + "-05:00";
+        }
+
+        // --- CLIENTE POR RUC (Fallback API externa si falla local) ---
+        function consultarRuc() {
+            const ruc = $('#NroDocumento').val();
+            Swal.showLoading();
+            $.get(`/api/ApiSunat/consultar-ruc/${ruc}`, function (resp) {
+                Swal.close();
+                if (resp.success) {
+                    $('#NombreRazonSocial').val(resp.razonSocial);
+                    $('#Direccion').val(resp.direccion);
+                } else {
+                    Swal.fire('Aviso', resp.message, 'warning');
+                }
+            }).fail(() => {
+                Swal.fire('Error', 'No se pudo consultar el RUC externamente', 'error');
+            });
+        }
+
+        // --- BUSQUEDA CLIENTE PRINCIPAL ---
+        $("#btnBuscarCliente").click(function () {
+            const nro = $("#NroDocumento").val().trim();
+            if (!nro) { Swal.fire('Aviso', "Ingrese Nro Documento", 'warning'); return; }
+
+            // Si es RUC (11 dígitos), intentamos lógica inteligente
+            if (nro.length === 11) {
+                // Primero buscamos local, si no, intentamos API externa (consultarRuc)
+                $.ajax({
+                    url: "/Libreria/ClienteBuscarPorDocumento",
+                    type: "GET",
+                    data: { nroDocumento: nro },
+                    success: function (res) {
+                        if (res && res.encontrado) {
+                            // Encontrado localmente
+                            const c = res.cliente;
+                            $("#EntidadClienteId").val(c.entidadId);
+                            $("#NombreRazonSocial").val(c.nombreRazon);
+                            $("#Direccion").val(c.direccion);
+                            $("#Email").val(c.email);
+                            $("#Telefono").val(c.telefono);
+                        } else {
+                            // No encontrado localmente, intentar API SUNAT
+                            consultarRuc();
+                        }
+                    },
+                    error: function() { consultarRuc(); } // Si falla local, intentar externo
+                });
+            } else {
+                // Lógica DNI Normal
+                $.ajax({
+                    url: "/Libreria/ClienteBuscarPorDocumento",
+                    type: "GET",
+                    data: { nroDocumento: nro },
+                    success: function (res) {
+                        if (res && res.encontrado) {
+                            const c = res.cliente;
+                            $("#EntidadClienteId").val(c.entidadId);
+                            $("#NombreRazonSocial").val(c.nombreRazon);
+                            $("#Direccion").val(c.direccion);
+                            $("#Email").val(c.email);
+                            $("#Telefono").val(c.telefono);
+                        } else {
+                            Swal.fire('No encontrado', 'Cliente no registrado', 'info');
+                        }
+                    }
+                });
+            }
+        });
+
+        $("#btnCancelar").click(function () {
+            if (detalles.length > 0) {
+                Swal.fire({
+                    title: '¿Cancelar?', text: "Se perderán los datos", icon: 'warning',
+                    showCancelButton: true, confirmButtonText: 'Sí'
+                }).then((r) => { if (r.isConfirmed) location.reload(); });
+            } else { location.reload(); }
+        });
+
+        // Cargar Cotización
+        $("#btnCargarDesdeCotizacion").click(function () {
+            const id = parseInt($("#txtIdCotizacion").val() || "0");
+            if (!id) { Swal.fire('Error', "ID inválido", 'error'); return; }
+
+            Swal.showLoading();
+            $.get("/Libreria/CotizacionObtener", { idCabecera: id }, function (resp) {
+                Swal.close();
+                if (!resp || !resp.encontrado) { Swal.fire('Error', "Cotización no encontrada", 'error'); return; }
+
+                const c = resp.cabecera;
+                $("#EntidadClienteId").val(c.entidadCliente);
+                $("#TipoDocumento").val(c.idTipoDocumentoCliente).trigger('change');
+                $("#NroDocumento").val(c.nroDocumentoCliente);
+                $("#NombreRazonSocial").val(c.nombreCliente);
+                $("#Direccion").val(c.direccionCliente);
+                $("#Email").val(c.emailCliente);
+                $("#Telefono").val(c.telefonoCliente);
+                $("#Moneda").val(c.tipoMoneda || "PEN");
+                $("#IdCabeceraOrigen").val(c.idCabecera);
+
+                detalles = [];
+                contadorItem = 1;
+                if (resp.detalle) {
+                    resp.detalle.forEach(d => {
+                        const cant = d.cantidad || 0;
+                        const pUnit = d.precioUnitario || 0;
+                        const descUnit = d.descuento || 0;
+                        const sub = (cant * pUnit) - (cant * descUnit);
+                        const descPct = pUnit > 0 ? (descUnit / pUnit) * 100 : 0;
+
+                        detalles.push({
+                            item: contadorItem++, sku: d.sku, descripcion: d.descripcion, codigoBarras: "",
+                            cantidad: cant, precioUnitario: pUnit, descuento: descPct, subtotal: sub
+                        });
+                    });
+                }
+                actualizarTabla();
+                Swal.fire('Cargado', 'Cotización importada', 'success');
+            });
+        });
+
     </script>
 }
