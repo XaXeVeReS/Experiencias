@@ -162,5 +162,12 @@ namespace LIBRERIA_APP.Controllers
             return Json(new { data = lista });
         }
 
+        [Authorize]
+        [HttpGet]
+        public IActionResult CostoSugerido_Controller(string sku)
+        {
+            var costo = _inventarioDatos.UltimoCostoINDatos(sku);
+            return Json(new { costoUnit = costo });
+        }
     }
 }

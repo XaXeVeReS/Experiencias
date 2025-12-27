@@ -131,5 +131,23 @@ namespace PROYECTO_LIBRERIA.Datos
 
             return lista;
         }
+        public decimal UltimoCostoINDatos(string sku)
+        {
+            decimal costo = 0m;
+
+            using (var conexion = new SqlConnection(cn.GetCadenaSQL()))
+            {
+                conexion.Open();
+                using var cmd = new SqlCommand("dbo.usp_Inventario_UltimoCostoIN", conexion);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@SKU", sku ?? "");
+
+                var obj = cmd.ExecuteScalar();
+                if (obj != null && obj != DBNull.Value)
+                    costo = Convert.ToDecimal(obj);
+            }
+
+            return costo;
+        }
     }
 }

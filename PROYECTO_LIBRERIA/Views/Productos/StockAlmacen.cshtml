@@ -1,277 +1,449 @@
 ﻿@{
-    ViewData["Title"] = "Inventario / Kardex";
+    ViewData["Title"] = "Control de Stock";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid mt-3">
-    <h3 class="mb-3"><i class="bi bi-box-seam"></i> Inventario (IN) y Kardex</h3>
+<style>
+    /* Estilos consistentes con la vista de Productos */
+    .card {
+        border: none;
+        border-radius: 12px;
+    }
 
-    <ul class="nav nav-tabs" id="invTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-inv-tab" data-bs-toggle="tab" data-bs-target="#tab-inv" type="button" role="tab">
-                Entrada Stock (IN)
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-kdx-tab" data-bs-toggle="tab" data-bs-target="#tab-kdx" type="button" role="tab">
-                Kardex
-            </button>
-        </li>
-    </ul>
+    .shadow-custom {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
 
-    <div class="tab-content border border-top-0 p-3 bg-white">
-        <!-- ===================== ENTRADA (IN) ===================== -->
-        <div class="tab-pane fade show active" id="tab-inv" role="tabpanel">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-5">
-                    <label class="form-label">Producto</label>
-                    <select id="cboProdEntrada" class="form-select"></select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Cantidad</label>
-                    <input id="txtCantidad" type="number" step="0.001" min="0" class="form-control" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Costo Unit.</label>
-                    <input id="txtCosto" type="number" step="0.0001" min="0" class="form-control" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Origen</label>
-                    <select id="cboOrigen" class="form-select">
-                        <option value="AJUSTE">AJUSTE</option>
-                        <option value="COMPRA">COMPRA</option>
-                    </select>
-                </div>
-                <div class="col-md-1 d-grid">
-                    <button id="btnAgregar" class="btn btn-primary"><i class="bi bi-plus-lg"></i></button>
-                </div>
-            </div>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #0d6efd, #0b5ed7);
+    }
 
-            <hr />
+    .bg-gradient-dark {
+        background: linear-gradient(45deg, #343a40, #212529);
+    }
 
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered" id="tblEntrada">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>SKU</th>
-                            <th>Producto</th>
-                            <th class="text-end">Cantidad</th>
-                            <th class="text-end">Costo</th>
-                            <th style="width:60px;">Quitar</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+    .bg-gradient-success {
+        background: linear-gradient(45deg, #198754, #157347);
+    }
 
-            <div class="d-flex justify-content-end gap-2">
-                <button id="btnRegistrar" class="btn btn-success">
-                    <i class="bi bi-check2-circle"></i> Registrar Entrada
+    .nav-pills .nav-link {
+        color: #495057;
+        font-weight: 500;
+        border-radius: 8px;
+        padding: 10px 20px;
+        transition: all 0.3s;
+    }
+
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+            box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+        }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+
+    .table thead {
+        background-color: #f1f3f5;
+        color: #495057;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-dark mb-0"><i class="bi bi-boxes me-2 text-primary"></i>Gestión de Inventario</h3>
+
+        <ul class="nav nav-pills" id="invTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-inv-tab" data-bs-toggle="pill" data-bs-target="#tab-inv" type="button" role="tab">
+                    <i class="bi bi-box-arrow-in-down me-2"></i>Entrada de Stock
                 </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-kdx-tab" data-bs-toggle="pill" data-bs-target="#tab-kdx" type="button" role="tab">
+                    <i class="bi bi-journal-text me-2"></i>Consultar Kardex
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="tab-content" id="pills-tabContent">
+
+        <div class="tab-pane fade show active" id="tab-inv" role="tabpanel">
+            <div class="card shadow-custom">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Registrar Ingreso de Mercadería</h5>
+                </div>
+                <div class="card-body p-4">
+
+                    <div class="row g-3 align-items-end p-3 bg-light rounded-3 border mb-4">
+                        <div class="col-lg-4 col-md-6">
+                            <label class="form-label fw-bold small text-muted">Producto</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+                                <select id="cboProdEntrada" class="form-select">
+                                    <option value="">-- Seleccione Producto --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-2 col-md-3">
+                            <label class="form-label fw-bold small text-muted">Cantidad</label>
+                            <div class="input-group">
+                                <input id="txtCantidad" type="number" step="0.001" min="0" class="form-control text-center" placeholder="0" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-2 col-md-3">
+                            <label class="form-label fw-bold small text-muted">Costo Unit.</label>
+                            <div class="input-group">
+                                <span class="input-group-text text-muted">S/</span>
+                                <input id="txtCosto" type="number" step="0.01" min="0" class="form-control text-end" placeholder="0.00" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-2 col-md-4">
+                            <label class="form-label fw-bold small text-muted">Motivo / Origen</label>
+                            <select id="cboOrigen" class="form-select">
+                                <option value="COMPRA">Compra</option>
+                                <option value="AJUSTE">Ajuste de Inv.</option>
+                            </select>
+                        </div>
+
+                        <div class="col-lg-2 col-md-12">
+                            <button id="btnAgregar" class="btn btn-outline-primary w-100 fw-bold" type="button">
+                                <i class="bi bi-plus-lg"></i> Agregar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive rounded-3 border mb-3">
+                        <table class="table table-hover align-middle mb-0" id="tblEntrada">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-3">SKU</th>
+                                    <th>Producto</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Costo Unit.</th>
+                                    <th class="text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button id="btnRegistrar" class="btn btn-success btn-lg px-5 shadow-sm" type="button">
+                            <i class="bi bi-save me-2"></i> Guardar Entrada
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- ===================== KARDEX ===================== -->
         <div class="tab-pane fade" id="tab-kdx" role="tabpanel">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-6">
-                    <label class="form-label">Producto</label>
-                    <select id="cboProdKardex" class="form-select"></select>
+            <div class="card shadow-custom">
+                <div class="card-header bg-gradient-dark text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-list-columns-reverse me-2"></i>Movimientos de Kardex</h5>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">Stock actual</label>
-                    <input id="txtStockActual" class="form-control" disabled />
-                </div>
-                <div class="col-md-3 d-grid">
-                    <button id="btnBuscarKardex" class="btn btn-dark">
-                        <i class="bi bi-search"></i> Ver Kardex
-                    </button>
-                </div>
-            </div>
+                <div class="card-body p-4">
 
-            <hr />
+                    <div class="row g-3 align-items-center mb-4">
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small text-muted">Seleccionar Producto</label>
+                            <div class="input-group shadow-sm">
+                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                                <select id="cboProdKardex" class="form-select border-start-0 ps-0">
+                                    <option value="">-- Buscar por SKU o Nombre --</option>
+                                </select>
+                            </div>
+                        </div>
 
-            <div class="table-responsive">
-                <table class="display" style="width:100%" id="tblKardex">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Tipo</th>
-                            <th>Cantidad</th>
-                            <th>Costo</th>
-                            <th>Origen</th>
-                            <th>RefTabla</th>
-                            <th>RefId</th>
-                            <th>Saldo</th>
-                        </tr>
-                    </thead>
-                </table>
+                        <div class="col-md-2">
+                            <label class="form-label d-none d-md-block">&nbsp;</label>
+                            <button id="btnBuscarKardex" class="btn btn-primary w-100 shadow-sm" type="button">
+                                Consultar
+                            </button>
+                        </div>
+
+                        <div class="col-md-5">
+                            <div class="d-flex align-items-center justify-content-end">
+                                <div class="card bg-gradient-success text-white shadow-sm" style="min-width: 200px;">
+                                    <div class="card-body p-2 d-flex align-items-center justify-content-between">
+                                        <div class="me-3">
+                                            <small class="text-white-50 text-uppercase fw-bold" style="font-size: 0.75rem;">Stock Actual</small>
+                                            <h3 class="mb-0 fw-bold" id="lblStockVisual">0.00</h3>
+                                        </div>
+                                        <i class="bi bi-box-seam" style="font-size: 2rem; opacity: 0.5;"></i>
+                                    </div>
+                                    <input id="txtStockActual" type="hidden" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-striped table-hover w-100 align-middle" id="tblKardex">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Fecha y Hora</th>
+                                    <th class="text-center">Tipo</th>
+                                    <th class="text-end">Cantidad</th>
+                                    <th class="text-end">Costo Unit.</th>
+                                    <th>Origen / Motivo</th>
+                                    <th class="text-end bg-secondary text-white">Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-3">
+                        <small class="text-muted"><i class="bi bi-info-circle me-1"></i> El saldo se recalcula en base al histórico de movimientos.</small>
+                    </div>
+                </div>
             </div>
         </div>
+
     </div>
 </div>
 
-<script>
-    let productosCache = [];
-    let detalleEntrada = [];
-    let dtKardex = null;
+@section Scripts {
+    <script>
+        let productosCache = [];
+        let detalleEntrada = [];
+        let dtKardex = null;
 
-    $(document).ready(function () {
-        cargarProductos();
+        $(document).ready(function () {
+            cargarProductos();
 
-        $('#btnAgregar').on('click', function () { agregarItem(); });
-        $('#btnRegistrar').on('click', function () { registrarEntrada(); });
-        $('#btnBuscarKardex').on('click', function () { cargarKardex(); });
-    });
+            $('#btnAgregar').on('click', function () { agregarItem(); });
+            $('#btnRegistrar').on('click', function () { registrarEntrada(); });
 
-    function cargarProductos() {
-        $.ajax({
-            url: '@Url.Action("ProductosLista_Controller", "Productos")',
-            type: 'GET',
-            success: function (res) {
-                productosCache = res.data || [];
+            // Al buscar Kardex, actualizamos la tabla y el indicador visual
+            $('#btnBuscarKardex').on('click', function () {
+                cargarKardex();
+            });
 
-                llenarCombo('#cboProdEntrada', productosCache);
-                llenarCombo('#cboProdKardex', productosCache);
-            },
-            error: function () {
-                Swal.fire('Error', 'No se pudo cargar la lista de productos.', 'error');
+            // Autocompletar costo sugerido al elegir producto
+            $('#cboProdEntrada').on('change', function () {
+                const sku = $(this).val();
+                if (!sku) { $('#txtCosto').val(''); return; }
+
+                $.get('@Url.Action("CostoSugerido_Controller", "Productos")', { sku: sku })
+                    .done(function (res) {
+                        const v = Number(res?.costoUnit ?? 0);
+                        $('#txtCosto').val(v > 0 ? v.toFixed(2) : '');
+                    })
+                    .fail(function () {
+                        $('#txtCosto').val('');
+                    });
+            });
+        });
+
+        function fmt2(v) {
+            if (v === null || v === undefined || v === '') return '';
+            return Number(v).toFixed(2);
+        }
+
+        function fmt3(v) {
+            if (v === null || v === undefined || v === '') return '';
+            return Number(v).toFixed(3);
+        }
+
+        function parseFecha(v) {
+            if (!v) return null;
+            if (typeof v === 'string' && v.startsWith('/Date(')) {
+                const ms = parseInt(v.substring(6), 10);
+                return new Date(ms);
             }
-        });
-    }
-
-    function llenarCombo(selector, lista) {
-        const $cbo = $(selector);
-        $cbo.empty();
-        $cbo.append('<option value="">-- Seleccione --</option>');
-
-        lista.forEach(p => {
-            const txt = `${p.sku} - ${p.nombre}`;
-            $cbo.append(`<option value="${p.sku}">${txt}</option>`);
-        });
-    }
-
-    function agregarItem() {
-        const sku = $('#cboProdEntrada').val();
-        const cant = parseFloat($('#txtCantidad').val());
-        const costoTxt = $('#txtCosto').val();
-        const costo = costoTxt ? parseFloat(costoTxt) : null;
-
-        if (!sku) { Swal.fire('Atención', 'Seleccione un producto.', 'warning'); return; }
-        if (!cant || cant <= 0) { Swal.fire('Atención', 'Cantidad debe ser mayor a 0.', 'warning'); return; }
-
-        const prod = productosCache.find(x => x.sku === sku);
-        const nombre = prod ? prod.nombre : '';
-
-        // Si ya existe el SKU en el detalle, sumamos cantidad
-        const idx = detalleEntrada.findIndex(x => x.sku === sku);
-        if (idx >= 0) {
-            detalleEntrada[idx].cantidad = parseFloat((detalleEntrada[idx].cantidad + cant).toFixed(3));
-            if (costo !== null) detalleEntrada[idx].costoUnit = costo;
-        } else {
-            detalleEntrada.push({ sku: sku, nombre: nombre, cantidad: cant, costoUnit: costo });
+            return new Date(v);
         }
 
-        $('#txtCantidad').val('');
-        $('#txtCosto').val('');
-        renderDetalle();
-    }
-
-    function renderDetalle() {
-        const $tb = $('#tblEntrada tbody');
-        $tb.empty();
-
-        detalleEntrada.forEach((x, i) => {
-            $tb.append(`
-                <tr>
-                    <td>${x.sku}</td>
-                    <td>${x.nombre ?? ''}</td>
-                    <td class="text-end">${x.cantidad}</td>
-                    <td class="text-end">${x.costoUnit ?? ''}</td>
-                    <td class="text-center">
-                        <button class="btn btn-sm btn-danger" onclick="quitarItem(${i})">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `);
-        });
-    }
-
-    function quitarItem(i) {
-        detalleEntrada.splice(i, 1);
-        renderDetalle();
-    }
-
-    function registrarEntrada() {
-        if (detalleEntrada.length === 0) {
-            Swal.fire('Atención', 'Agrega al menos 1 item.', 'warning');
-            return;
+        function formatFecha(v) {
+            const d = parseFecha(v);
+            if (!d || isNaN(d.getTime())) return '';
+            const pad = n => String(n).padStart(2, '0');
+            return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
         }
 
-        const payload = {
-            origen: $('#cboOrigen').val(),
-            detalle: detalleEntrada
-        };
-
-        $.ajax({
-            url: '@Url.Action("InventarioEntradaGrupo_Controller", "Productos")',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
-            success: function (res) {
-                if (res.codMensaje === "1") {
-                    Swal.fire('OK', res.mensaje, 'success');
-                    detalleEntrada = [];
-                    renderDetalle();
-                } else {
-                    Swal.fire('Error', res.mensaje || 'No se pudo registrar.', 'error');
+        function cargarProductos() {
+            $.ajax({
+                url: '@Url.Action("ProductosLista_Controller", "Productos")',
+                type: 'GET',
+                success: function (res) {
+                    productosCache = res.data || [];
+                    llenarCombo('#cboProdEntrada', productosCache);
+                    llenarCombo('#cboProdKardex', productosCache);
+                },
+                error: function () {
+                    Swal.fire('Error', 'No se pudo cargar la lista de productos.', 'error');
                 }
-            },
-            error: function (xhr) {
-                Swal.fire('Error', xhr.responseText || 'Error en servidor.', 'error');
-            }
-        });
-    }
-
-    function cargarKardex() {
-        const sku = $('#cboProdKardex').val();
-        if (!sku) { Swal.fire('Atención', 'Seleccione un producto.', 'warning'); return; }
-
-        // Stock actual
-        $.get('@Url.Action("StockDisponible_Controller", "Productos")', { sku: sku }, function (res) {
-            $('#txtStockActual').val(res.stock);
-        });
-
-        // DataTable Kardex
-        if (dtKardex) {
-            dtKardex.destroy();
-            $('#tblKardex').empty().append(`
-                <thead>
-                    <tr>
-                        <th>Fecha</th><th>Tipo</th><th>Cantidad</th><th>Costo</th><th>Origen</th><th>RefTabla</th><th>RefId</th><th>Saldo</th>
-                    </tr>
-                </thead>
-            `);
+            });
         }
 
-        dtKardex = $('#tblKardex').DataTable({
-            ajax: {
-                url: '@Url.Action("KardexPorSku_Controller", "Productos")',
-                data: { sku: sku },
-                dataSrc: 'data'
-            },
-            order: [[0, 'desc']],
-            columns: [
-                { data: 'fecha' },
-                { data: 'tipo' },
-                { data: 'cantidad' },
-                { data: 'costoUnit' },
-                { data: 'origen' },
-                { data: 'refTabla' },
-                { data: 'refId' },
-                { data: 'saldo' }
-            ]
-        });
-    }
-</script>
+        function llenarCombo(selector, lista) {
+            const $cbo = $(selector);
+            $cbo.empty();
+            $cbo.append('<option value="">-- Seleccione --</option>');
+            lista.forEach(p => {
+                const txt = `${p.sku} - ${p.nombre}`;
+                $cbo.append(`<option value="${p.sku}">${txt}</option>`);
+            });
+        }
+
+        function agregarItem() {
+            const sku = $('#cboProdEntrada').val();
+            const cant = parseFloat($('#txtCantidad').val());
+            const origen = $('#cboOrigen').val();
+
+            const costoTxt = $('#txtCosto').val();
+            const costo = costoTxt ? parseFloat(costoTxt) : null;
+
+            if (!sku) { Swal.fire('Atención', 'Seleccione un producto.', 'warning'); return; }
+            if (!cant || cant <= 0) { Swal.fire('Atención', 'Cantidad debe ser mayor a 0.', 'warning'); return; }
+
+            if (origen === 'COMPRA' && (!costo || costo <= 0)) {
+                Swal.fire('Atención', 'En COMPRA el costo unitario es obligatorio.', 'warning');
+                return;
+            }
+
+            const prod = productosCache.find(x => x.sku === sku);
+            const nombre = prod ? prod.nombre : '';
+
+            const idx = detalleEntrada.findIndex(x => x.sku === sku);
+            if (idx >= 0) {
+                detalleEntrada[idx].cantidad = parseFloat((detalleEntrada[idx].cantidad + cant).toFixed(3));
+                if (costo !== null) detalleEntrada[idx].costoUnit = costo;
+            } else {
+                detalleEntrada.push({ sku: sku, nombre: nombre, cantidad: cant, costoUnit: costo });
+            }
+
+            $('#txtCantidad').val('');
+            renderDetalle();
+        }
+
+        function renderDetalle() {
+            const $tb = $('#tblEntrada tbody');
+            $tb.empty();
+
+            detalleEntrada.forEach((x, i) => {
+                $tb.append(`
+                    <tr>
+                        <td class="fw-bold">${x.sku}</td>
+                        <td>${x.nombre ?? ''}</td>
+                        <td class="text-end"><span class="badge bg-primary fs-6">${fmt3(x.cantidad)}</span></td>
+                        <td class="text-end">${x.costoUnit == null ? '-' : 'S/ ' + fmt2(x.costoUnit)}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="quitarItem(${i})" type="button" title="Quitar">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        function quitarItem(i) {
+            detalleEntrada.splice(i, 1);
+            renderDetalle();
+        }
+
+        function registrarEntrada() {
+            if (detalleEntrada.length === 0) {
+                Swal.fire('Atención', 'Agrega al menos 1 item.', 'warning');
+                return;
+            }
+
+            const payload = {
+                origen: $('#cboOrigen').val(),
+                detalle: detalleEntrada
+            };
+
+            $.ajax({
+                url: '@Url.Action("InventarioEntradaGrupo_Controller", "Productos")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function (res) {
+                    if (res.codMensaje === "1" || res.codMensaje === 1) {
+                        Swal.fire('Excelente', res.mensaje, 'success');
+                        detalleEntrada = [];
+                        renderDetalle();
+                        $('#txtCosto').val('');
+                        $('#txtCantidad').val('');
+                        $('#cboProdEntrada').val('');
+                    } else {
+                        Swal.fire('Error', res.mensaje || 'No se pudo registrar.', 'error');
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire('Error', xhr.responseText || 'Error en servidor.', 'error');
+                }
+            });
+        }
+
+        function cargarKardex() {
+            const sku = $('#cboProdKardex').val();
+            if (!sku) { Swal.fire('Atención', 'Seleccione un producto para consultar.', 'warning'); return; }
+
+            // Lógica añadida: Actualizar el indicador visual grande
+            $.get('@Url.Action("StockDisponible_Controller", "Productos")', { sku: sku }, function (res) {
+                const stockVal = fmt3(res.stock ?? 0);
+                $('#txtStockActual').val(stockVal); // Mantiene compatibilidad
+                $('#lblStockVisual').text(stockVal); // Actualiza la tarjeta bonita
+            });
+
+            if (dtKardex) {
+                dtKardex.destroy();
+                dtKardex = null;
+            }
+
+            dtKardex = $('#tblKardex').DataTable({
+                ajax: {
+                    url: '@Url.Action("KardexPorSku_Controller", "Productos")',
+                    data: { sku: sku },
+                    dataSrc: 'data',
+                    error: function () {
+                        Swal.fire('Error', 'No se pudo cargar el kardex (revisa servidor).', 'error');
+                    }
+                },
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                order: [[0, 'desc']],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+                },
+                columns: [
+                    { data: 'fecha', render: d => `<i class="bi bi-clock me-1 text-muted"></i>` + formatFecha(d) },
+                    {
+                        data: 'tipo',
+                        className: 'text-center',
+                        render: t => (t === 'IN'
+                            ? '<span class="badge bg-success"><i class="bi bi-arrow-down"></i> Entrada</span>'
+                            : '<span class="badge bg-danger"><i class="bi bi-arrow-up"></i> Salida</span>')
+                    },
+                    { data: 'cantidad', className: 'text-end fw-bold', render: n => fmt3(n ?? 0) },
+                    { data: 'costoUnit', className: 'text-end', render: n => (n == null ? '-' : 'S/ ' + fmt2(n)) },
+                    {
+                        data: 'origen',
+                        render: o => (o === 'COMPRA'
+                            ? '<span class="text-primary fw-bold">Compra</span>'
+                            : (o === 'AJUSTE' ? '<span class="text-warning text-dark fw-bold">Ajuste</span>'
+                            : (o === 'VENTA' ? '<span class="text-success fw-bold">Venta</span>' : (o ?? ''))))
+                    },
+                    { data: 'saldo', className: 'text-end fw-bold text-dark bg-light', render: n => fmt3(n ?? 0) }
+                ]
+            });
+        }
+    </script>
+}
