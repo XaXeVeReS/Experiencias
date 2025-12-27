@@ -1,6 +1,4 @@
-﻿
-
-@model LIBRERIA_APP.Models.LibreriaModel
+﻿@model LIBRERIA_APP.Models.LibreriaModel
 @{
     ViewData["Title"] = "Consulta de Ventas";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -40,6 +38,7 @@
                             <th>ID</th>
                             <th>Fecha Registro</th>
                             <th>Tipo</th>
+                            <th>Estado</th>
                             <th>Documento</th>
                             <th>Cliente</th>
                             <th>Moneda</th>
@@ -73,7 +72,6 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -93,29 +91,62 @@
                 "ajax": {
                     "url": "@Url.Action("ListarVentasCot", "Libreria")",
                     "type": "GET",
-                    "data": { filtro: filtro }
+                    "data": { filtro: filtro },
+                    "dataSrc": "data" // Importante para leer el array 'data' del JSON
                 },
                 "columns": [
-                    { "data": "idCabecera" },
-                    { "data": "mensaje" }, // Fecha
+                    { "data": "idCabecera" },  // minúscula
+                    { "data": "mensaje" },     // minúscula (tu fecha formateada)
                     {
-                        "data": "tipoDocumento",
+                        "data": "tipoDocumento", // minúscula
                         "render": function(data) {
+                            if (!data) return '';
                             return data === 'Venta'
                                 ? '<span class="badge bg-success">Venta</span>'
                                 : '<span class="badge bg-warning text-dark">Cotización</span>';
                         }
                     },
-                    { "data": "nroDocumentoCliente" },
-                    { "data": "nombreCliente" },
-                    { "data": "tipoMoneda" },
-                    { "data": "importeTotal", "render": $.fn.dataTable.render.number(',', '.', 2, '') },
                     {
-                        "data": "idCabecera",
-                        "render": function (data) {
-                            return `<button class="btn btn-primary btn-sm" onclick="VerDetalle(${data})">
-                                        <i class="bi bi-eye"></i> Detalle
-                                    </button>`;
+                        "data": "estado", // minúscula
+                        "render": function(data) {
+                            if (!data) return '';
+                            // Convertimos a mayúsculas por si acaso viene mixto
+                            let estadoUpper = data.toUpperCase();
+                            if (estadoUpper === 'ANULADO' || estadoUpper === 'CANCELADO') {
+                                return `<span class="badge bg-danger">${data}</span>`;
+                            }
+                            return `<span class="badge bg-info text-dark">${data}</span>`;
+                        }
+                    },
+                    { "data": "nroDocumentoCliente" }, // minúscula
+                    { "data": "nombreCliente" },       // minúscula
+                    { "data": "tipoMoneda" },          // minúscula
+                    { "data": "importeTotal", "render": $.fn.dataTable.render.number(',', '.', 2, '') }, // minúscula
+                    {
+                        "data": "idCabecera", // minúscula
+                        "render": function (data, type, row) {
+                            // 'data' es el idCabecera
+                            // 'row' es el objeto completo de la fila
+
+                            // Botón Detalle
+                            let btnDetalle = `<button class="btn btn-primary btn-sm me-1" onclick="VerDetalle(${data})" title="Ver Detalle">
+                                                <i class="bi bi-eye"></i>
+                                              </button>`;
+
+                            // Botón Anular
+                            // Verificamos propiedades en minúscula
+                            let btnAnular = '';
+                            let tipoDoc = row.tipoDocumento || '';
+                            let estado = row.estado || '';
+
+                            // Mostrar solo si es Venta y NO está anulada
+                            if (tipoDoc === 'Venta' && estado !== 'ANULADO' && estado !== 'CANCELADO') {
+                                 btnAnular = `<button class="btn btn-danger btn-sm" onclick="AnularVenta(${data})" title="Anular Venta">
+                                                <i class="bi bi-trash"></i>
+                                              </button>`;
+                            }
+
+                            return `<div class="d-flex justify-content-center">${btnDetalle}${btnAnular}</div>`;
                         }
                     }
                 ],
@@ -127,11 +158,10 @@
         function VerDetalle(id) {
             $("#txtIdVenta").text(id);
 
-            // Llamada al controlador para obtener el detalle
             $.get("@Url.Action("ObtenerDetalle", "Libreria")", { id: id }, function (res) {
-
+                // Probamos leer codMensaje (minúscula) que es el estándar
                 if (res.codMensaje === "1") {
-                    // 1. Armar HTML de la Cabecera
+
                     let cabeceraHtml = `
                         <div class="row mb-3 p-3 border rounded bg-light">
                             <div class="col-6">
@@ -148,7 +178,6 @@
                             </div>
                         </div>`;
 
-                    // 2. Armar Tabla de Detalles
                     let detalleHtml = `<table class="table table-striped table-bordered align-middle">
                         <thead class="table-dark text-center">
                             <tr>
@@ -164,7 +193,7 @@
 
                     if(res.detalle && res.detalle.length > 0){
                         res.detalle.forEach(d => {
-                            // Aquí usamos d.subTotal (con s minúscula por el JSON de C#)
+                            // Usamos las propiedades en minúscula para el detalle también
                             detalleHtml += `<tr>
                                 <td class="text-center small">${d.sku}</td>
                                 <td>${d.descripcion}</td>
@@ -180,7 +209,6 @@
 
                     detalleHtml += `</tbody></table>`;
 
-                    // 3. Pintar en el modal y mostrar
                     $("#cuerpoDetalle").html(cabeceraHtml + detalleHtml);
                     $("#modalDetalleVenta").modal("show");
 
@@ -193,9 +221,7 @@
         }
 
         function ExportarPDF() {
-            // Seleccionamos el área del modal que queremos imprimir
             const element = document.getElementById('areaImpresion');
-
             const opt = {
                 margin:       0.5,
                 filename:     `Comprobante_${$("#txtIdVenta").text()}.pdf`,
@@ -203,9 +229,39 @@
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
-
-            // Generar y guardar
             html2pdf().set(opt).from(element).save();
+        }
+
+        function AnularVenta(id) {
+            Swal.fire({
+                title: '¿Anular Venta?',
+                text: "Esta acción revertirá el stock de los productos. ¿Estás seguro?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, anular',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("AnularVenta", "Libreria")',
+                        type: 'POST',
+                        data: { idCabecera: id },
+                        success: function (res) {
+                            if (res.codMensaje === "1") {
+                                Swal.fire('¡Anulado!', res.mensaje, 'success');
+                                $('#tblConsultaVentas').DataTable().ajax.reload();
+                            } else {
+                                Swal.fire('Error', res.mensaje, 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Error', 'Error al comunicarse con el servidor.', 'error');
+                        }
+                    });
+                }
+            });
         }
     </script>
 }

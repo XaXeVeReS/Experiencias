@@ -289,8 +289,9 @@ namespace LIBRERIA_APP.Datos
                                 NombreCliente = dr["NombreCliente"].ToString(),
                                 ImporteTotal = Convert.ToDecimal(dr["ImporteTotal"]),
                                 TipoMoneda = dr["TipoMoneda"].ToString(),
-                                TipoDocumento = dr["TipoDocDescripcion"].ToString(), // 'Venta' o 'Cotización'
-                                Mensaje = dr["FechaTexto"].ToString() // Usamos Mensaje para la fecha formateada
+                                TipoDocumento = dr["TipoDocDescripcion"].ToString(),
+                                Mensaje = dr["FechaTexto"].ToString(),
+                                Estado = dr["Estado"] != DBNull.Value ? dr["Estado"].ToString() : ""
                             });
                         }
                     }
@@ -358,6 +359,43 @@ namespace LIBRERIA_APP.Datos
             }
 
             return cabecera;
+        }
+
+        public dynamic AnularVenta(int idCabecera, int idUsuario)
+        {
+            var resultado = new { CodMensaje = "0", Mensaje = "" };
+
+            try
+            {
+                using (var conexion = new SqlConnection(cn.GetCadenaSQL()))
+                {
+                    conexion.Open();
+                    using (var cmd = new SqlCommand("dbo.usp_Venta_Anular", conexion))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
+                        cmd.Parameters.AddWithValue("@IDCabeceraVEN", idCabecera);
+
+                        using (var dr = cmd.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                resultado = new
+                                {
+                                    CodMensaje = dr["CodMensaje"].ToString(),
+                                    Mensaje = dr["Mensaje"].ToString()
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                resultado = new { CodMensaje = "0", Mensaje = "Error: " + ex.Message };
+            }
+
+            return resultado;
         }
     }
 }

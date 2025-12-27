@@ -10,6 +10,7 @@
         public string? Direccion { get; set; }
         public string? TipoMoneda { get; set; }
         public string? TipoDocumento { get; set; }
+        public string? Estado { get; set; }
         public decimal ImporteTotal { get; set; }
         public DateTime? FechaValidez { get; set; }
 

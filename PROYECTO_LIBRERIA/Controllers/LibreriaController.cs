@@ -222,5 +222,18 @@ namespace LIBRERIA_APP.Controllers
             var datos = new LibreriaDatos().ObtenerDetalle(id);
             return Json(datos); // Devolvemos todo el objeto LibreriaModel con su lista Detalle
         }
+
+        [HttpPost]
+        public IActionResult AnularVenta(int idCabecera)
+        {
+            int idUsuario = ObtenerIdUsuarioActual();
+
+            // Validación de sesión básica
+            if (idUsuario <= 0)
+                return Json(new { codMensaje = "0", mensaje = "Sesión no válida." });
+
+            var respuesta = _libreriaDatos.AnularVenta(idCabecera, idUsuario);
+            return Json(respuesta);
+        }
     }
 }
