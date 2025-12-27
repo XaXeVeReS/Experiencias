@@ -49,7 +49,7 @@
 
                 <div class="mb-3">
                     <label class="form-label">Nro Documento</label>
-                    <input type="text" id="txtNroDoc" class="form-control" />
+                    <input type="text" id="txtNroDoc" class="form-control" onkeyup="soloNumeros(this)" oninput="soloNumeros(this)" />
                 </div>
 
                 <div class="mb-3">
@@ -207,8 +207,8 @@
                 telefono: $('#txtTelefono').val()
             };
 
-            if (!modelo.nombreRazon) {
-                Swal.fire('Validación', 'El nombre/razón social es obligatorio.', 'warning');
+            if (!modelo.nombreRazon || !modelo.idTipoDocumento ||  !modelo.nroDocumento || !modelo.direccion || !modelo.email || !modelo.telefono) {
+                Swal.fire('Validación', 'Completar los datos en los campos, obligatorio.', 'warning');
                 return;
             }
 
@@ -254,6 +254,10 @@
                     Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
                 }
             });
+        }
+
+        function soloNumeros(input) {
+            input.value = input.value.replace(/[^0-9]/g, '');
         }
     </script>
 }

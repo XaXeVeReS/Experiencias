@@ -15,11 +15,11 @@
             <thead>
                 <tr>
                     <th>SKU</th>
-                    <th>Proveedor</th>
                     <th>Nombre</th>
                     <th>Categoría</th>
                     <th>Precio</th>
-                    <th>Stock mín.</th>
+                    <th>IGV (18%)</th>
+                    <th>Precio Venta</th>
                     <th>Estado</th>
                     <th style="width: 90px;">Acciones</th>
                 </tr>
@@ -29,7 +29,6 @@
     </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal fade" id="modalProducto" tabindex="-1" aria-labelledby="modalProductoLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -41,49 +40,63 @@
 
                 <div class="mb-3">
                     <label for="txtSku" class="form-label">SKU</label>
-                    <input type="text" id="txtSku" class="form-control" />
+                    <input type="text" id="txtSku" class="form-control" onkeyup="soloNumeros(this)" oninput="soloNumeros(this)" maxlength="20" />
                     <small class="text-muted">Código único del producto.</small>
                 </div>
 
                 <div class="mb-3">
                     <label for="txtNombreProd" class="form-label">Nombre</label>
-                    <input type="text" id="txtNombreProd" class="form-control" />
+                    <input type="text" id="txtNombreProd" maxlength="150" class="form-control" />
                 </div>
 
                 <div class="mb-3">
                     <label for="txtDescripcionProd" class="form-label">Descripción</label>
-                    <textarea id="txtDescripcionProd" class="form-control" rows="2"></textarea>
+                    <textarea id="txtDescripcionProd" class="form-control" maxlength="250" rows="2"></textarea>
                 </div>
 
-                <div class="mb-3">
-                    <label for="cboCategoria" class="form-label">Categoría</label>
-                    <select id="cboCategoria" class="form-select">
-                        <option value="">-- Seleccione --</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="cboProveedor" class="form-label">Proveedor</label>
-                    <select id="cboProveedor" class="form-select">
-                        <option value="">-- Seleccione --</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="txtPrecio" class="form-label">Precio (S/)</label>
-                    <input type="number" step="0.01" id="txtPrecio" class="form-control" />
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="cboCategoria" class="form-label">Categoría</label>
+                        <select id="cboCategoria" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cboProveedor" class="form-label">Proveedor</label>
+                        <select id="cboProveedor" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="txtStockMin" class="form-label">Stock mínimo</label>
-                    <input type="number" step="0.001" id="txtStockMin" class="form-control" />
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="txtPrecio" class="form-label">Precio Final</label>
+                        <input type="number" step="0.01" id="txtPrecio" class="form-control" oninput="calcularDesglose()" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Sin IGV</label>
+                        <input type="text" id="txtPrecioSinIGV" class="form-control bg-light" readonly />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Monto IGV</label>
+                        <input type="text" id="txtMontoIGV" class="form-control bg-light" readonly />
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="cboEstado" class="form-label">Estado</label>
-                    <select id="cboEstado" class="form-select">
-                        <option value="">-- Seleccione --</option>
-                        <option value="ACTIVO">ACTIVO</option>
-                        <option value="INACTIVO">INACTIVO</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="txtStockMin" class="form-label">Stock mínimo</label>
+                        <input type="number" step="0.001" id="txtStockMin" maxlength="14" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cboEstado" class="form-label">Estado</label>
+                        <select id="cboEstado" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            <option value="ACTIVO">ACTIVO</option>
+                            <option value="INACTIVO">INACTIVO</option>
+                        </select>
+                    </div>
                 </div>
 
             </div>
@@ -120,23 +133,28 @@
                 },
                 columns: [
                     { data: "sku" },
-                    { data: "nombreProveedor" },
                     { data: "nombre" },
                     { data: "nombreCategoria" },
-                    { data: "precio" },
-                    { data: "stockMin" },
+                    {
+                        data: "precioSinIGV",
+                        render: function(data) { return data ? "S/ " + parseFloat(data).toFixed(2) : "0.00"; }
+                    },
+                    {
+                        data: "igv",
+                        render: function(data) { return data ? "S/ " + parseFloat(data).toFixed(2) : "0.00"; }
+                    },
+                    {
+                        data: "precio",
+                        render: function(data) { return "<strong>S/ " + parseFloat(data).toFixed(2) + "</strong>"; }
+                    },
                     { data: "estado" },
                     {
                         data: "sku",
                         render: function (data) {
-                            return `
-                                <button class="btn btn-sm btn-primary me-1" onclick="editarProducto('${data}')">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-                            `;
-                        },
-                        orderable: false,
-                        searchable: false
+                            return `<button class="btn btn-sm btn-primary me-1" onclick="editarProducto('${data}')">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>`;
+                        }
                     }
                 ],
                 pageLength: 5,
@@ -144,6 +162,15 @@
                     url: "https://cdn.datatables.net/plug-ins/2.1.5/i18n/es-MX.json"
                 }
             });
+        }
+
+        function calcularDesglose() {
+            let total = parseFloat($('#txtPrecio').val()) || 0;
+            let sinIgv = total / 1.18;
+            let igv = total - sinIgv;
+
+            $('#txtPrecioSinIGV').val(sinIgv.toFixed(2));
+            $('#txtMontoIGV').val(igv.toFixed(2));
         }
 
         function cargarCategoriasCombo() {
@@ -158,14 +185,12 @@
                     data.forEach(function (item) {
                         $cbo.append(`<option value="${item.idCategoria}">${item.nombre}</option>`);
                     });
-                },
-                error: function () {
-                    Swal.fire('Error', 'No se pudieron cargar las categorías.', 'error');
                 }
             });
         }
 
         function cargarProveedoresCombo() {
+
             $.ajax({
                 url: '@Url.Action("ProveedoresListaSimple_Controller", "Proveedores")',
                 type: 'GET',
@@ -177,9 +202,6 @@
                     data.forEach(function (item) {
                         $cbo.append(`<option value="${item.entidadId}">${item.nombreRazon}</option>`);
                     });
-                },
-                error: function () {
-                    Swal.fire('Error', 'No se pudieron cargar los proveedores.', 'error');
                 }
             });
         }
@@ -190,7 +212,10 @@
             $('#txtNombreProd').val('');
             $('#txtDescripcionProd').val('');
             $('#cboCategoria').val('');
+            $('#cboProveedor').val('');
             $('#txtPrecio').val('');
+            $('#txtPrecioSinIGV').val('');
+            $('#txtMontoIGV').val('');
             $('#txtStockMin').val('');
             $('#cboEstado').val('');
 
@@ -204,31 +229,31 @@
                 type: 'GET',
                 data: { sku: sku },
                 success: function (data) {
-                    $('#txtSku').val(data.sku);
-                    $('#txtSku').prop('disabled', true); // no dejar cambiar SKU al editar
-
+                    $('#txtSku').val(data.sku).prop('disabled', true);
                     $('#txtNombreProd').val(data.nombre);
                     $('#cboProveedor').val(data.entidadIdProveedor || '');
                     $('#txtDescripcionProd').val(data.descripcion);
                     $('#cboCategoria').val(data.idCategoria || '');
                     $('#txtPrecio').val(data.precio);
+
+                    // Calculamos el desglose visualmente al cargar
+                    calcularDesglose();
+
                     $('#txtStockMin').val(data.stockMin);
                     $('#cboEstado').val(data.estado || '');
 
                     $('#modalProductoLabel').text('Editar producto');
                     modalProducto.show();
-                },
-                error: function () {
-                    Swal.fire('Error', 'No se pudo obtener el producto.', 'error');
                 }
             });
         }
 
         function guardarProducto() {
             const sku = $('#txtSku').val();
+            const precio = $('#txtPrecio').val();
 
-            if (!sku) {
-                Swal.fire('Validación', 'El SKU es obligatorio.', 'warning');
+            if (!sku || !$('#txtNombreProd').val() || !precio) {
+                Swal.fire('Validación', 'Completar los campos obligatorios.', 'warning');
                 return;
             }
 
@@ -238,12 +263,12 @@
                 entidadIdProveedor: $('#cboProveedor').val() ? parseInt($('#cboProveedor').val()) : null,
                 descripcion: $('#txtDescripcionProd').val(),
                 idCategoria: $('#cboCategoria').val() ? parseInt($('#cboCategoria').val()) : null,
-                precio: $('#txtPrecio').val() ? parseFloat($('#txtPrecio').val()) : null,
+                precio: parseFloat(precio),
                 stockMin: $('#txtStockMin').val() ? parseFloat($('#txtStockMin').val()) : null,
                 estado: $('#cboEstado').val()
             };
 
-            const esEdicion = $('#txtSku').prop('disabled'); // si está deshabilitado, estamos editando
+            const esEdicion = $('#txtSku').prop('disabled');
             const url = esEdicion
                 ? '@Url.Action("ProductosActualizar_Controller", "Productos")'
                 : '@Url.Action("ProductosCrear_Controller", "Productos")';
@@ -255,18 +280,19 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (data) {
-                    if (data.codMensaje === "1" || data.codMensaje === 1) {
+                    if (data.codMensaje == "1") {
                         Swal.fire('Correcto', data.mensaje, 'success');
                         modalProducto.hide();
                         tablaProductos.ajax.reload();
                     } else {
-                        Swal.fire('Advertencia', data.mensaje || 'Ocurrió un problema.', 'warning');
+                        Swal.fire('Advertencia', data.mensaje, 'warning');
                     }
-                },
-                error: function () {
-                    Swal.fire('Error', 'Error al guardar el producto.', 'error');
                 }
             });
+        }
+
+        function soloNumeros(input) {
+            input.value = input.value.replace(/[^0-9]/g, '');
         }
     </script>
 }

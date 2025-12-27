@@ -4,7 +4,7 @@
 }
 
 <style>
-    /* Estilos de coherencia visual con Generar Venta */
+    /* Estilos estandarizados */
     .card {
         border: none;
         border-radius: 12px;
@@ -66,30 +66,43 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-dark"><i class="bi bi-file-earmark-text-fill me-2 text-primary"></i>Registrar Cotización</h2>
         <div class="total-display p-2 px-4 bg-white rounded-pill shadow-sm border">
-            TOTAL COTIZACIÓN: <span class="text-primary">S/ </span><span id="TotalCotizacion">0.00</span>
+            TOTAL: <span class="text-primary">S/ </span><span id="TotalCotizacion">0.00</span>
         </div>
     </div>
 
     <form id="formCotizacion">
         <div class="card shadow-sm-custom mb-4">
             <div class="card-header bg-gradient-primary text-white py-3">
-                <i class="bi bi-person-lines-fill me-2"></i>Datos de la Cotización
+                <i class="bi bi-person-lines-fill me-2"></i>Datos del Cliente y Condiciones
             </div>
 
             <div class="card-body row g-3">
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold">Cliente / Razón Social</label>
-                    <div class="input-group shadow-sm">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" id="Cliente" class="form-control" placeholder="Nombre del cliente" required />
-                    </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Tipo Documento</label>
+                    <select id="TipoDocumento" class="form-select shadow-sm">
+                        <option value="1">DNI</option>
+                        <option value="2">RUC</option>
+                        <option value="3">Carnet Extranjería</option>
+                        <option value="0">Otro</option>
+                    </select>
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label fw-semibold">RUC / DNI</label>
+                    <label class="form-label fw-semibold">Nro Documento</label>
                     <div class="input-group shadow-sm">
                         <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                        <input type="text" id="Documento" class="form-control" placeholder="Nro de documento" />
+                        <input type="text" id="Documento" class="form-control" placeholder="Número" maxlength="8" />
+                        <button type="button" class="btn btn-outline-primary" id="btnBuscarCliente" title="Buscar si existe">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Nombre / Razón Social</label>
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" id="Cliente" class="form-control" placeholder="Nombre del cliente" />
                     </div>
                 </div>
 
@@ -99,7 +112,7 @@
                            value="@DateTime.Now.ToString("yyyy-MM-dd")" />
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label class="form-label fw-semibold">Moneda</label>
                     <select id="Moneda" class="form-select shadow-sm">
                         <option value="PEN">Soles (PEN)</option>
@@ -108,21 +121,21 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label fw-semibold">Contacto / Atención</label>
-                    <input type="text" id="Atencion" class="form-control shadow-sm" placeholder="Persona de contacto" />
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label fw-semibold">Validez (días)</label>
+                    <label class="form-label fw-semibold">Validez de Oferta</label>
                     <div class="input-group shadow-sm">
-                        <input type="number" id="Validez" class="form-control text-center" value="7" />
+                        <input type="number" id="Validez" class="form-control text-center" value="7" min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                         <span class="input-group-text">Días</span>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Condiciones de Pago / Observaciones</label>
-                    <input type="text" id="Condiciones" class="form-control shadow-sm" placeholder="Ej: Pago contra entrega, 50% adelanto..." />
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Atención a (Contacto)</label>
+                    <input type="text" id="Atencion" class="form-control shadow-sm" placeholder="Ej: Sr. Juan Pérez" />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Condiciones / Observaciones</label>
+                    <input type="text" id="Condiciones" class="form-control shadow-sm" placeholder="Ej: Pago 50% adelantado, entrega en almacén..." />
                 </div>
             </div>
         </div>
@@ -139,9 +152,6 @@
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
                             <input type="text" id="CodigoBarras" class="form-control shadow-sm" placeholder="Escanear..." />
-                            <button type="button" class="btn btn-outline-dark">
-                                <i class="bi bi-camera"></i>
-                            </button>
                         </div>
                     </div>
 
@@ -162,21 +172,21 @@
 
                     <div class="col-md-1">
                         <label class="form-label fw-bold small">Cant.</label>
-                        <input type="number" id="Cantidad" class="form-control shadow-sm text-center" value="1" min="1" />
+                        <input type="number" id="Cantidad" class="form-control shadow-sm text-center" value="1" min="1" oninput="validarPositivo(this)" />
                     </div>
 
                     <div class="col-md-1">
                         <label class="form-label fw-bold small">Precio</label>
                         <input type="number" id="PrecioUnitario" class="form-control shadow-sm text-end" step="0.01" />
-                    </div>
+                        <input type="hidden" id="PrecioOriginal" /> </div>
 
                     <div class="col-md-1">
                         <label class="form-label fw-bold small">Desc %</label>
-                        <input type="number" id="Descuento" class="form-control shadow-sm text-center" value="0" min="0" max="100" step="0.01" />
+                        <input type="number" id="Descuento" class="form-control shadow-sm text-center" value="0" min="0" max="100" step="0.01" oninput="validarPorcentaje(this)" />
                     </div>
 
                     <div class="col-md-1">
-                        <button type="button" id="btnAgregar" class="btn btn-success w-100 shadow-sm">
+                        <button type="button" id="btnAgregar" class="btn btn-success w-100 shadow-sm" title="Agregar a la lista">
                             <i class="bi bi-plus-lg"></i>
                         </button>
                     </div>
@@ -196,19 +206,19 @@
                                 <th class="text-center" width="60"></th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody class="border-top-0"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div class="row mb-5">
-            <div class="col-6">
+        <div class="row mb-5 justify-content-center">
+            <div class="col-md-4">
                 <button type="button" id="btnCancelar" class="btn btn-outline-danger btn-lg w-100 btn-action shadow-sm">
-                    <i class="bi bi-x-circle me-2"></i>Cancelar Cotización
+                    <i class="bi bi-x-circle me-2"></i>Cancelar
                 </button>
             </div>
-            <div class="col-6">
+            <div class="col-md-4">
                 <button type="button" id="btnGuardar" class="btn btn-primary btn-lg w-100 btn-action shadow-sm">
                     <i class="bi bi-save-fill me-2"></i>Guardar Cotización
                 </button>
@@ -234,7 +244,7 @@
                                 <th>Nombre</th>
                                 <th>Categoría</th>
                                 <th>Precio</th>
-                                <th>Stock mín.</th>
+                                <th>Stock</th>
                                 <th class="text-center">Acción</th>
                             </tr>
                         </thead>
@@ -253,12 +263,82 @@
         let tablaProductos;
         let modalProductos;
 
+        // --- VALIDACIONES INPUTS ---
+        function validarPositivo(input) {
+            if (input.value < 1) input.value = 1;
+        }
+
+        function validarPorcentaje(input) {
+            if (input.value < 0) input.value = 0;
+            if (input.value > 100) input.value = 100;
+        }
+
+        // --- VALIDACIÓN DOCUMENTO ---
+        $("#TipoDocumento").change(function () {
+            const tipo = $(this).val();
+            const inputDoc = $("#Documento");
+            // inputDoc.val(""); // COMENTADO para no borrar al buscar
+
+            if (tipo == "1") { // DNI
+                inputDoc.attr("maxlength", "8");
+                inputDoc.attr("placeholder", "8 dígitos");
+                inputDoc.attr("oninput", "this.value = this.value.replace(/[^0-9]/g, '')");
+            } else if (tipo == "2") { // RUC
+                inputDoc.attr("maxlength", "11");
+                inputDoc.attr("placeholder", "11 dígitos");
+                inputDoc.attr("oninput", "this.value = this.value.replace(/[^0-9]/g, '')");
+            } else {
+                inputDoc.removeAttr("maxlength");
+                inputDoc.attr("placeholder", "Alfanumérico");
+                inputDoc.removeAttr("oninput");
+            }
+        });
+        // Inicializar
+        $("#TipoDocumento").trigger("change");
+
+        // --- BUSCAR CLIENTE (Reutiliza endpoint de Venta) ---
+        $("#btnBuscarCliente").click(function () {
+            const nro = $("#Documento").val().trim();
+            if (!nro) { Swal.fire('Atención', "Ingrese el Nro de Documento.", 'warning'); return; }
+
+            Swal.showLoading();
+            $.ajax({
+                url: "/Libreria/ClienteBuscarPorDocumento",
+                type: "GET",
+                data: { nroDocumento: nro },
+                success: function (res) {
+                    Swal.close();
+                    if (!res || !res.encontrado) {
+                        Swal.fire('Info', "Cliente no encontrado en base de datos. Ingrese el nombre manualmente.", 'info');
+                        // No borramos, dejamos que escriba
+                        return;
+                    }
+                    const c = res.cliente;
+                    // Llenamos campos coincidentes
+                    $("#Cliente").val(c.nombreRazon);
+                    $("#TipoDocumento").val(c.idTipoDocumento).trigger("change");
+                    $("#Documento").val(nro); // Restaurar por si trigger lo borra
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cliente Encontrado',
+                        text: c.nombreRazon,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                },
+                error: function () { Swal.fire('Error', "Error al buscar cliente.", 'error'); }
+            });
+        });
+
+        // --- LÓGICA DE PRODUCTOS ---
         function limpiarProducto() {
             $("#CodigoBarras").val("");
             $("#SKU").val("");
             $("#ProductoDescripcion").val("");
             $("#Cantidad").val(1);
             $("#PrecioUnitario").val("");
+            $("#PrecioOriginal").val("");
             $("#Descuento").val(0);
             $("#CodigoBarras").focus();
         }
@@ -266,12 +346,10 @@
         function actualizarTabla() {
             const tbody = $("#tablaDetalle tbody");
             tbody.empty();
-
             let total = 0;
 
             detalles.forEach((item, index) => {
                 total += item.subtotal;
-
                 tbody.append(`
                     <tr>
                         <td class="text-center">${item.item}</td>
@@ -282,9 +360,8 @@
                         <td class="text-center">${item.descuento.toFixed(2)}%</td>
                         <td class="text-end">${item.subtotal.toFixed(2)}</td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-danger btn-sm"
-                                    onclick="eliminarItem(${index})">
-                                <i class="fas fa-trash"></i>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarItem(${index})">
+                                <i class="bi bi-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -294,17 +371,36 @@
             $("#TotalCotizacion").text(total.toFixed(2));
         }
 
-        $("#btnAgregar").click(function () {
-            const codigoBarras = $("#CodigoBarras").val().trim();
+        // --- AGREGAR PRODUCTO ---
+        $("#btnAgregar").click(async function () {
+            // Validaciones básicas de producto
             const sku = $("#SKU").val().trim();
             const descripcion = $("#ProductoDescripcion").val().trim();
             const cantidad = parseFloat($("#Cantidad").val() || "0");
             const precioUnitario = parseFloat($("#PrecioUnitario").val() || "0");
+            const precioOriginal = parseFloat($("#PrecioOriginal").val() || "0");
             const descuento = parseFloat($("#Descuento").val() || "0");
+            const codigoBarras = $("#CodigoBarras").val().trim();
 
             if (!descripcion || cantidad <= 0 || precioUnitario <= 0) {
-                alert("Completa los datos del producto.");
+                Swal.fire('Faltan datos', "Seleccione un producto válido con precio y cantidad.", 'warning');
                 return;
+            }
+
+            // Alerta cambio de precio
+            if (precioOriginal > 0 && precioUnitario !== precioOriginal) {
+                const confirmacion = await Swal.fire({
+                    title: 'Precio Modificado',
+                    text: `El precio de lista es S/ ${precioOriginal}. ¿Aplicar nuevo precio de S/ ${precioUnitario}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cambiar',
+                    cancelButtonText: 'No, cancelar'
+                });
+                if (!confirmacion.isConfirmed) {
+                    $("#PrecioUnitario").val(precioOriginal);
+                    return; 
+                }
             }
 
             let subtotalBruto = cantidad * precioUnitario;
@@ -327,16 +423,25 @@
         });
 
         function eliminarItem(index) {
-            if (!confirm("¿Eliminar este producto?")) return;
-
-            detalles.splice(index, 1);
-            detalles.forEach((item, idx) => item.item = idx + 1);
-            contadorItem = detalles.length + 1;
-            actualizarTabla();
+            Swal.fire({
+                title: '¿Eliminar?',
+                text: "Se quitará el producto de la lista",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    detalles.splice(index, 1);
+                    detalles.forEach((item, idx) => item.item = idx + 1);
+                    contadorItem = detalles.length + 1;
+                    actualizarTabla();
+                }
+            });
         }
-
         window.eliminarItem = eliminarItem;
 
+        // --- DATATABLE BUSQUEDA ---
         function initTablaProductos() {
             tablaProductos = $("#tblBuscarProductos").DataTable({
                 ajax: {
@@ -352,103 +457,87 @@
                     { data: "stockMin" },
                     {
                         data: null,
-                        render: function (data, type, row, meta) {
-                            return `
-                                <button type="button" class="btn btn-success btn-sm"
-                                        onclick="seleccionarProducto(${meta.row})">
-                                    Elegir
-                                </button>`;
+                        render: function (data) {
+                            return `<button type='button' class='btn btn-success btn-sm' onclick='seleccionarProducto(${JSON.stringify(data)})'>Elegir</button>`;
                         },
-                        orderable: false,
-                        searchable: false
+                        orderable: false
                     }
                 ],
-                pageLength: 10,
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/2.1.5/i18n/es-MX.json"
-                }
+                pageLength: 5,
+                language: { url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" }
             });
         }
 
-        function seleccionarProducto(rowIndex) {
-            const data = tablaProductos.row(rowIndex).data();
-            if (!data) return;
-
+        window.seleccionarProducto = function(data) {
             $("#SKU").val(data.sku);
             $("#ProductoDescripcion").val(data.nombre);
             $("#PrecioUnitario").val(data.precio || 0);
-
+            $("#PrecioOriginal").val(data.precio || 0);
             modalProductos.hide();
-        }
-
-        window.seleccionarProducto = seleccionarProducto;
+        };
 
         $(document).ready(function () {
             const modalProductosEl = document.getElementById("modalProductos");
             if (modalProductosEl) {
                 modalProductos = new bootstrap.Modal(modalProductosEl);
             }
-
             $("#btnBuscarProducto").click(function () {
-                if (!tablaProductos) {
-                    initTablaProductos();
-                }
+                if (!tablaProductos) initTablaProductos();
                 modalProductos.show();
             });
         });
 
-        function inferirTipoDocId(valor) {
-            const doc = (valor || "").trim();
-            if (doc.length === 11) return 2; // RUC
-            if (doc.length === 8)  return 1; // DNI
-            return 1;
-        }
-
+        // --- GUARDAR COTIZACIÓN ---
         $("#btnGuardar").click(function () {
-            if (detalles.length === 0) {
-                alert("Agrega al menos un producto.");
-                return;
-            }
-
-            const rucDni = $("#Documento").val().trim();
-            const clienteNombre = $("#Cliente").val().trim();
+            // Validaciones Cabecera
+            const nroDoc = $("#Documento").val().trim();
+            const cliente = $("#Cliente").val().trim();
             const diasValidez = parseInt($("#Validez").val() || "0");
+            const tipoDoc = $("#TipoDocumento").val();
 
-            if (!rucDni || !clienteNombre) {
-                alert("Ingresa RUC/DNI y nombre de cliente.");
+            if (!cliente) { Swal.fire('Error', "Ingrese el Nombre del Cliente.", 'error'); return; }
+            if (!nroDoc) { Swal.fire('Error', "Ingrese el Documento del Cliente.", 'error'); return; }
+            
+            // Validar longitud doc según tipo
+            if (tipoDoc == "1" && nroDoc.length != 8) { Swal.fire('Error', "El DNI debe tener 8 dígitos.", 'error'); return; }
+            if (tipoDoc == "2" && nroDoc.length != 11) { Swal.fire('Error', "El RUC debe tener 11 dígitos.", 'error'); return; }
+
+            if (detalles.length === 0) {
+                Swal.fire('Error', "Agrega al menos un producto al detalle.", 'error');
                 return;
             }
 
+            // Construir Objeto
             let cot = {
                 tipoDocumento: "COT",
                 tipoMoneda: $("#Moneda").val(),
                 direccion: null,
                 importeTotal: parseFloat($("#TotalCotizacion").text() || "0"),
-
                 entidadCliente: 0,
-
-                idTipoDocumentoCliente: inferirTipoDocId(rucDni),
-                nroDocumentoCliente: rucDni,
-                nombreCliente: clienteNombre,
-                direccionCliente: null,
+                idTipoDocumentoCliente: parseInt(tipoDoc),
+                nroDocumentoCliente: nroDoc,
+                nombreCliente: cliente,
+                diasValidez: diasValidez, 
+                telefonoCliente: null, 
                 emailCliente: null,
-                telefonoCliente: null,
-
-                diasValidez: isNaN(diasValidez) ? 0 : diasValidez,
-                idCabeceraOrigen: 0,
-
+                
                 detalle: detalles.map(d => {
-                const descuentoUnit = (d.precioUnitario * (d.descuento || 0)) / 100.0; // % -> monto unitario
+                    const descuentoUnit = (d.precioUnitario * (d.descuento || 0)) / 100.0;
                     return {
-                     item: d.item,
-                     sku: d.sku,
-                     cantidad: d.cantidad,
-                     precioUnitario: d.precioUnitario,
-                     descuento: descuentoUnit
+                        item: d.item,
+                        sku: d.sku,
+                        cantidad: d.cantidad,
+                        precioUnitario: d.precioUnitario,
+                        descuento: descuentoUnit
                     };
                 })
-
             };
+
+            Swal.fire({
+                title: 'Guardando...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
 
             $.ajax({
                 url: "/Libreria/RegistrarCotizacion",
@@ -456,24 +545,38 @@
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify(cot),
                 success: function (resp) {
+                    Swal.close();
                     if (resp && (resp.codMensaje === "1" || resp.codMensaje === 1)) {
-                        alert(resp.mensaje || "Cotización registrada correctamente.");
-                        location.reload();
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Cotización Registrada!',
+                            text: resp.mensaje || "Cotización creada con éxito.",
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => location.reload());
                     } else {
-                        alert(resp.mensaje || "Ocurrió un problema al registrar la cotización.");
+                        Swal.fire('Error', resp.mensaje || "Ocurrió un problema.", 'error');
                     }
                 },
                 error: function () {
-                    alert("Error al registrar la cotización.");
+                    Swal.fire('Error', "Error de conexión con el servidor.", 'error');
                 }
             });
         });
 
         $("#btnCancelar").click(function () {
-            if (detalles.length > 0 && !confirm("¿Cancelar la cotización? Se perderán los datos.")) {
-                return;
+            if (detalles.length > 0) {
+                Swal.fire({
+                    title: '¿Cancelar?',
+                    text: "Se perderán los datos ingresados.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) location.reload();
+                });
+            } else {
+                location.reload();
             }
-            location.reload();
         });
     </script>
 }

@@ -38,12 +38,12 @@
 
                 <div class="mb-3">
                     <label for="txtNombre" class="form-label">Nombre</label>
-                    <input type="text" id="txtNombre" class="form-control" />
+                    <input type="text" id="txtNombre" maxlength="120" class="form-control" />
                 </div>
 
                 <div class="mb-3">
                     <label for="txtDescripcion" class="form-label">Descripción</label>
-                    <textarea id="txtDescripcion" class="form-control" rows="3"></textarea>
+                    <textarea id="txtDescripcion" maxlength="200" class="form-control" rows="3"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -132,6 +132,15 @@
 
         function guardarCategoria() {
             const id = parseInt($('#idCategoria').val() || "0");
+            const Nombre = $('#txtNombre').val();
+            const Descripcion = $('#txtDescripcion').val();
+
+            if(!Nombre || !Descripcion)
+            {
+                Swal.fire('Validación', 'Completar todos los campos.', 'warning');
+                return;
+            }
+
             const modelo = {
                 idCategoria: id,
                 nombre: $('#txtNombre').val(),

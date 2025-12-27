@@ -223,6 +223,7 @@ namespace LIBRERIA_APP.Datos
                 cmd.Parameters.AddWithValue("Usuario", use.usuario);
                 cmd.Parameters.AddWithValue("Contrasenia", use.contrasenia);
                 cmd.Parameters.AddWithValue("IDrol", use.idrol);
+                cmd.Parameters.AddWithValue("@Activo", use.activo);
                 cmd.CommandType = CommandType.StoredProcedure;
                 var rd = cmd.ExecuteReader();
                 if (rd.Read())

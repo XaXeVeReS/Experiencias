@@ -25,19 +25,17 @@
     .fade-in {
         animation: fadeIn 0.5s ease-in-out;
     }
+
     @@keyframes fadeIn {
-        from
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
-    {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }</style>
 
 <div class="container-fluid fade-in">
@@ -198,7 +196,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-                const filtrarModos = () => {
+            const filtrarModos = () => {
             const seccion = document.getElementById('selSeccion').value;
             const selModo = document.getElementById('selModo');
 
@@ -398,7 +396,7 @@
                 responsive: true,
                 pageLength: 10,
                 order: [],
-                dom: '<"d-flex justify-content-between mb-2"f>rt<"d-flex justify-content-between mt-2"ip>'
+                //dom: '<"d-flex justify-content-between mb-2"f>rt<"d-flex justify-content-between mt-2"ip>'
             });
         };
 

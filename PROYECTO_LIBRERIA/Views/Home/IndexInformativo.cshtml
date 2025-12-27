@@ -59,15 +59,30 @@
                 <div class="col-md-6">
                     <h5 class="text-primary border-bottom pb-2">Módulos Accesibles</h5>
                     <p class="text-muted small">Usted tiene acceso a los siguientes módulos según su rol:</p>
-                    <div class="d-flex flex-wrap">
-                        <span class="badge bg-success module-badge"><i class="bi bi-check2-circle me-1"></i>Generar Venta</span>
-                        <span class="badge bg-success module-badge"><i class="bi bi-check2-circle me-1"></i>Generar Cotización</span>
-                        <span class="badge bg-success module-badge"><i class="bi bi-check2-circle me-1"></i>Consultar Venta</span>
-                        <span class="badge bg-success module-badge"><i class="bi bi-check2-circle me-1"></i>Reportes</span>
+                    <div class="d-flex flex-wrap gap-2">
+
+                        @* 1. Módulos Operativos: Para todos los roles internos *@
+                        @if (User.IsInRole("ADMINISTRADOR") || User.IsInRole("VENDEDOR") || User.IsInRole("SUPERVISOR") || User.IsInRole("ANALISTA"))
+                        {
+                            <span class="badge bg-success module-badge p-2"><i class="bi bi-cart-plus me-1"></i>Generar Venta</span>
+                            <span class="badge bg-success module-badge p-2"><i class="bi bi-file-earmark-text me-1"></i>Generar Cotización</span>
+                            <span class="badge bg-primary module-badge p-2"><i class="bi bi-search me-1"></i>Consultar Venta</span>
+                            <span class="badge bg-info text-dark module-badge p-2"><i class="bi bi-box-seam me-1"></i>Gestión Productos</span>
+                        }
+
+                        @* 2. Reportes: Admins, Supervisores y Analistas (Vendedores NO) *@
+                        @if (User.IsInRole("ADMINISTRADOR") || User.IsInRole("SUPERVISOR") || User.IsInRole("ANALISTA"))
+                        {
+                            <span class="badge bg-warning text-dark module-badge p-2"><i class="bi bi-bar-chart-line-fill me-1"></i>Reportes</span>
+                        }
+
+                        @* 3. Administración Pura: Solo Administrador *@
                         @if (User.IsInRole("ADMINISTRADOR"))
                         {
-                            <span class="badge bg-dark module-badge"><i class="bi bi-shield-lock me-1"></i>Configuración Total</span>
+                            <span class="badge bg-dark module-badge p-2"><i class="bi bi-shield-lock me-1"></i>Configuración Total</span>
+                            <span class="badge bg-dark module-badge p-2"><i class="bi bi-people-fill me-1"></i>Usuarios</span>
                         }
+
                     </div>
                 </div>
             </div>

@@ -31,8 +31,9 @@ namespace PROYECTO_LIBRERIA.Datos
                             sku = rd["SKU"].ToString(),
                             nombre = rd["ProductoNombre"].ToString(),
                             descripcion = rd["ProductoDescripcion"].ToString(),
-
-                            precio = rd["PrecioUnid"] == DBNull.Value? (decimal?)null: Convert.ToDecimal(rd["PrecioUnid"]),
+                            precioSinIGV = rd["PrecioSinIGV"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(rd["PrecioSinIGV"]),
+                            igv = rd["MontoIGV"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(rd["MontoIGV"]),
+                            precio = rd["PrecioUnid"] == DBNull.Value ? (decimal?)null : Convert.ToDecimal(rd["PrecioUnid"]),
                             stockMin = rd["StockMin"] == DBNull.Value? (decimal?)null: Convert.ToDecimal(rd["StockMin"]),
                             idCategoria = rd["IDCategoria"] == DBNull.Value? (int?)null: Convert.ToInt32(rd["IDCategoria"]),
                             nombreCategoria = rd["NombreCategoria"].ToString(),
